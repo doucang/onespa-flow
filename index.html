@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Spa 小ONE 订单流程图</title>
+<style>
+:root{
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f6f6f4;
+  --color-background-tertiary:#efeee9;
+  --color-text-primary:#1a1a18;
+  --color-text-secondary:#5c5c57;
+  --color-text-tertiary:#8a8a82;
+  --color-border-tertiary:rgba(0,0,0,.13);
+  --color-border-secondary:rgba(0,0,0,.26);
+  --color-border-primary:rgba(0,0,0,.4);
+  --font-sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --border-radius-md:8px; --border-radius-lg:12px; --border-radius-xl:16px;
+}
+html,body{margin:0;padding:0;background:#fafaf8}
+body{padding:24px;max-width:1240px;margin:0 auto}
+@media print{
+  @page{size:A3 landscape;margin:10mm}
+  body{padding:0;background:#fff}
+  .band,.chain,.rules,.os-legend{break-inside:avoid}
+}
+
+.osflow{
+  --g:#16a34a; --a:#e08407; --r:#dc2626; --p:#7c3aed; --n:#16365c; --l:#5a9e16;
+  font-family:var(--font-sans); color:var(--color-text-primary);
+  font-size:13px; line-height:1.45;
+}
+.osflow .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.osflow *{box-sizing:border-box}
+.os-h{font-size:21px;font-weight:500;margin:0 0 4px}
+.os-sub{color:var(--color-text-secondary);font-size:12.5px;margin:0 0 16px}
+
+.os-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 14px;padding:10px 12px;
+  border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);
+  background:var(--color-background-secondary)}
+.lg{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--color-text-secondary)}
+.sw{width:13px;height:13px;border-radius:3px;flex:none;border:1px solid}
+.sw.g{background:color-mix(in srgb,var(--g) 22%,#fff);border-color:var(--g)}
+.sw.a{background:color-mix(in srgb,var(--a) 22%,#fff);border-color:var(--a)}
+.sw.r{background:color-mix(in srgb,var(--r) 22%,#fff);border-color:var(--r)}
+.sw.p{background:color-mix(in srgb,var(--p) 22%,#fff);border-color:var(--p)}
+.sw.n{background:var(--n);border-color:var(--n)}
+.sw.l{background:color-mix(in srgb,var(--l) 26%,#fff);border-color:var(--l)}
+
+.os-chains{display:grid;gap:8px;margin:0 0 16px}
+.chain{border:1px solid;border-radius:var(--border-radius-lg);padding:9px 11px}
+.chain.A{border-color:color-mix(in srgb,var(--g) 45%,transparent);background:color-mix(in srgb,var(--g) 7%,#fff)}
+.chain.B{border-color:color-mix(in srgb,var(--r) 45%,transparent);background:color-mix(in srgb,var(--r) 7%,#fff)}
+.chain .ttl{font-weight:500;font-size:12.5px;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.chain.A .ttl{color:color-mix(in srgb,var(--g) 55%,var(--color-text-primary))}
+.chain.B .ttl{color:color-mix(in srgb,var(--r) 55%,var(--color-text-primary))}
+.dot{font-size:10px;font-weight:500;padding:1px 7px;border-radius:20px;color:#fff;flex:none}
+.dot.A{background:var(--g)} .dot.B{background:var(--r)}
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:4px 2px}
+.step{font-size:11.5px;padding:3px 8px;border-radius:6px;background:var(--color-background-secondary);
+  border:1px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+.arr{color:var(--color-text-tertiary);font-size:12px;padding:0 1px}
+
+.os-layout{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:860px){.os-layout{grid-template-columns:minmax(0,1fr) 286px;align-items:start}}
+
+.band{border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);
+  overflow:hidden;background:#fff}
+.bh{display:flex;align-items:center;gap:9px;padding:8px 12px;
+  background:var(--color-background-secondary);border-bottom:1px solid var(--color-border-tertiary)}
+.bn{width:22px;height:22px;border-radius:6px;background:var(--color-text-primary);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex:none}
+.bt{font-weight:500;font-size:13.5px}
+.bsub{color:var(--color-text-tertiary);font-size:11.5px;margin-left:auto;text-align:right}
+.bz{padding:12px}
+
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.row>.node{flex:1 1 140px}
+
+.node{border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);
+  padding:8px 10px;background:#fff}
+.node b{display:block;font-weight:500;font-size:12.5px;margin-bottom:2px}
+.node small{display:block;color:var(--color-text-secondary);font-size:11px;line-height:1.35}
+.node .src{display:inline-block;font-size:10px;font-weight:500;margin-bottom:4px;padding:1px 6px;border-radius:5px}
+
+.c-g{border-color:color-mix(in srgb,var(--g) 42%,transparent);background:color-mix(in srgb,var(--g) 9%,#fff)}
+.c-g b{color:color-mix(in srgb,var(--g) 55%,var(--color-text-primary))}
+.c-a{border-color:color-mix(in srgb,var(--a) 45%,transparent);background:color-mix(in srgb,var(--a) 10%,#fff)}
+.c-a b{color:color-mix(in srgb,var(--a) 58%,var(--color-text-primary))}
+.c-r{border-color:color-mix(in srgb,var(--r) 45%,transparent);background:color-mix(in srgb,var(--r) 9%,#fff)}
+.c-r b{color:color-mix(in srgb,var(--r) 55%,var(--color-text-primary))}
+.c-p{border-color:color-mix(in srgb,var(--p) 45%,transparent);background:color-mix(in srgb,var(--p) 10%,#fff)}
+.c-p b{color:color-mix(in srgb,var(--p) 58%,var(--color-text-primary))}
+.c-l{border-color:color-mix(in srgb,var(--l) 48%,transparent);background:color-mix(in srgb,var(--l) 13%,#fff)}
+.c-l b{color:color-mix(in srgb,var(--l) 52%,var(--color-text-primary))}
+.c-n{border-color:var(--n);background:var(--n);color:#fff}
+.c-n b{color:#fff} .c-n small{color:rgba(255,255,255,.82)}
+
+.src.g{background:color-mix(in srgb,var(--g) 16%,#fff);color:color-mix(in srgb,var(--g) 55%,var(--color-text-primary))}
+.src.a{background:color-mix(in srgb,var(--a) 18%,#fff);color:color-mix(in srgb,var(--a) 58%,var(--color-text-primary))}
+.src.r{background:color-mix(in srgb,var(--r) 16%,#fff);color:color-mix(in srgb,var(--r) 55%,var(--color-text-primary))}
+.src.x{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+
+.down{text-align:center;color:var(--color-text-tertiary);font-size:15px;line-height:1;margin:6px 0}
+.note{font-size:11.5px;color:var(--color-text-secondary);background:var(--color-background-secondary);
+  border:1px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);padding:7px 10px;margin-top:10px}
+.note b{color:var(--color-text-primary);font-weight:500}
+
+.dec{margin:4px auto;max-width:340px;text-align:center;color:#fff;font-weight:500;font-size:12.5px;
+  padding:13px 18px;background:var(--a);
+  clip-path:polygon(14% 0,86% 0,100% 50%,86% 100%,14% 100%,0 50%)}
+.dec small{display:block;font-weight:400;font-size:11px;color:rgba(255,255,255,.85);margin-top:2px}
+
+.fork{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:520px){.fork{grid-template-columns:1fr 1fr}}
+.branch{border-radius:var(--border-radius-md);padding:8px;border:1px dashed}
+.branch.A{border-color:color-mix(in srgb,var(--g) 50%,transparent);background:color-mix(in srgb,var(--g) 5%,#fff)}
+.branch.B{border-color:color-mix(in srgb,var(--r) 50%,transparent);background:color-mix(in srgb,var(--r) 5%,#fff)}
+.blab{font-size:11.5px;font-weight:500;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.blab.A{color:color-mix(in srgb,var(--g) 55%,var(--color-text-primary))}
+.blab.B{color:color-mix(in srgb,var(--r) 55%,var(--color-text-primary))}
+.yn{font-size:10px;color:#fff;padding:1px 7px;border-radius:20px;font-weight:500}
+.yn.y{background:var(--g)} .yn.n{background:var(--r)} .yn.alt{background:var(--a)}
+.mergebar{text-align:center;font-size:11px;color:var(--color-text-tertiary);margin:9px 0 4px;
+  border-top:1px dashed var(--color-border-secondary);padding-top:8px}
+
+.rules{border:1px solid color-mix(in srgb,var(--p) 30%,var(--color-border-tertiary));
+  border-radius:var(--border-radius-lg);background:color-mix(in srgb,var(--p) 5%,#fff);overflow:hidden}
+.rules-h{padding:9px 12px;font-weight:500;font-size:13px;
+  color:color-mix(in srgb,var(--p) 55%,var(--color-text-primary));
+  border-bottom:1px solid color-mix(in srgb,var(--p) 22%,var(--color-border-tertiary))}
+.rules ul{list-style:none;margin:0;padding:8px 12px 12px}
+.rules li{font-size:12px;padding:7px 0;border-bottom:1px solid var(--color-border-tertiary);line-height:1.45}
+.rules li:last-child{border-bottom:0}
+.eq{font-weight:500}
+.eq.ok{color:color-mix(in srgb,var(--g) 55%,var(--color-text-primary))}
+.eq.no{color:color-mix(in srgb,var(--r) 55%,var(--color-text-primary))}
+.rules li small{display:block;color:var(--color-text-secondary);font-size:11px;margin-top:2px}
+
+.fork.three{grid-template-columns:1fr}
+@media(min-width:620px){.fork.three{grid-template-columns:1fr 1fr 1fr}}
+
+.bypass{margin-top:12px;border:1px dashed color-mix(in srgb,var(--a) 55%,transparent);
+  border-radius:var(--border-radius-md);background:color-mix(in srgb,var(--a) 6%,#fff);padding:9px 11px}
+.bp-h{font-size:11.5px;font-weight:500;color:color-mix(in srgb,var(--a) 58%,var(--color-text-primary));
+  margin-bottom:7px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.bp-tag{font-size:10px;color:#fff;background:var(--a);padding:1px 7px;border-radius:20px}
+.bp-row{display:flex;flex-wrap:wrap;align-items:center;gap:3px}
+.bp-step{font-size:11.5px;padding:3px 8px;border-radius:6px;background:#fff;
+  border:1px solid color-mix(in srgb,var(--a) 30%,var(--color-border-tertiary))}
+.bp-dest{font-weight:500;color:color-mix(in srgb,var(--a) 58%,var(--color-text-primary));border-style:dashed}
+.bp-note{font-size:11px;color:var(--color-text-secondary);margin-top:6px}
+
+.formula{margin:10px 0 0;border:1px solid color-mix(in srgb,var(--p) 40%,transparent);
+  border-radius:var(--border-radius-md);background:color-mix(in srgb,var(--p) 7%,#fff);padding:10px 12px;text-align:center}
+.formula .f1{font-size:13px;font-weight:500;color:color-mix(in srgb,var(--p) 58%,var(--color-text-primary));line-height:1.5}
+.formula .f2{font-size:11px;color:var(--color-text-secondary);margin-top:5px}
+</style>
+</head>
+<body>
+<div class="osflow">
+
+<div class="os-h">One Spa「小ONE」订单入库 · 散客群通知 · 打单入账 · 履约核销 · 抽成结算流程图</div>
+<div class="os-sub">小ONE = 订单入口 / 标准化 / 入库 / 散客群通知 / 抽成证据台账　·　ERP = 最终财务事实源　·　预约总账 = 到店准备与标绿工具</div>
+
+<div class="os-legend">
+  <span class="lg"><span class="sw g"></span>官网自动化链路</span>
+  <span class="lg"><span class="sw a"></span>人工确认链路</span>
+  <span class="lg"><span class="sw r"></span>未付款 / 到店付款链路</span>
+  <span class="lg"><span class="sw p"></span>小ONE / Commission Ledger</span>
+  <span class="lg"><span class="sw n"></span>ERP / 收银 / 财务事实源</span>
+  <span class="lg"><span class="sw l"></span>预约总账 / 标绿核销</span>
+</div>
+
+<div class="os-chains">
+  <div class="chain A">
+    <div class="ttl"><span class="dot A">链路 A</span>已付款订单：付款后马上打单，不等到店</div>
+    <div class="steps">
+      <span class="step">客户完成付款</span><span class="arr">→</span>
+      <span class="step">小ONE 入库</span><span class="arr">→</span>
+      <span class="step">小ONE 发散客群</span><span class="arr">→</span>
+      <span class="step">前台看到付款证明</span><span class="arr">→</span>
+      <span class="step">前台马上打单入账</span><span class="arr">→</span>
+      <span class="step">进入 ERP / 收银</span><span class="arr">→</span>
+      <span class="step">预约日到店</span><span class="arr">→</span>
+      <span class="step">履约完成 · 回写小ONE台账</span><span class="arr">→</span>
+      <span class="step">（到店类）预约总账标绿</span>
+    </div>
+  </div>
+  <div class="chain B">
+    <div class="ttl"><span class="dot B">链路 B</span>未付款 / 到店付款：到店收款后才打单</div>
+    <div class="steps">
+      <span class="step">线上预约 · 未付款</span><span class="arr">→</span>
+      <span class="step">交小ONE 入库</span><span class="arr">→</span>
+      <span class="step">发散客群（标注未付款 / 到店付款）</span><span class="arr">→</span>
+      <span class="step">客户到店</span><span class="arr">→</span>
+      <span class="step">前台先收款</span><span class="arr">→</span>
+      <span class="step">前台打单入账</span><span class="arr">→</span>
+      <span class="step">进入 ERP / 收银</span><span class="arr">→</span>
+      <span class="step">履约完成 · 回写小ONE台账</span><span class="arr">→</span>
+      <span class="step">（到店类）预约总账标绿</span>
+    </div>
+  </div>
+</div>
+
+<div class="os-layout">
+<div class="os-flow">
+
+  <div class="band">
+    <div class="bh"><span class="bn">1</span><span class="bt">流量入口（线上流量）</span><span class="bsub">五类订单的唯一源头</span></div>
+    <div class="bz">
+      <div class="row">
+        <div class="node"><span class="src x">线上</span><b>Facebook</b><small>广告 / 主页导流</small></div>
+        <div class="node"><span class="src x">线上</span><b>Instagram</b><small>广告 / 主页导流</small></div>
+        <div class="node"><span class="src x">线上</span><b>其他线上入口</b><small>各渠道导流</small></div>
+      </div>
+      <div class="note"><b>来源与归因：</b>线上流量主要进入官网或 WhatsApp；普通到店、QR / 现金、外派多由官网或 WhatsApp 承接。<b>BK 区属于独立线下渠道</b>，每周人工对账后补入小ONE台账。<b>外派是独立业务类型</b>，不进预约总账，履约状态回写小ONE台账。</div>
+    </div>
+  </div>
+  <div class="down">↓</div>
+
+  <div class="band">
+    <div class="bh"><span class="bn">2</span><span class="bt">成交 / 沟通入口 + 需求定性</span><span class="bsub">官网自助 · WhatsApp 先判需求再付款</span></div>
+    <div class="bz">
+      <div class="row">
+        <div class="node c-g"><span class="src g">① 官网</span><b>官网 WooCommerce（自助）</b><small>客户自助下单 + 在线付款 · 普通到店 spa · 最自动化、证据最强 → 直接进小ONE 自动抓取</small></div>
+        <div class="node c-a"><span class="src a">人工客服</span><b>WhatsApp 人工客服</b><small>官网外 / 需人工的客户由客服承接 · <b>先判需求类型，再引导付款</b></small></div>
+      </div>
+      <div class="bypass" style="border-style:solid;border-color:color-mix(in srgb,var(--a) 45%,transparent)">
+        <div class="bp-h"><span class="bp-tag">WhatsApp 人工客服路径</span>判完需求类型，才让客户付款</div>
+        <div class="dec">◇ 判断 1：人工客服判断需求类型？<small>普通到店 / 外派 / BK 区</small></div>
+        <div class="down">↓</div>
+        <div class="fork three">
+          <div class="branch" style="border-color:color-mix(in srgb,var(--a) 50%,transparent);background:color-mix(in srgb,var(--a) 5%,#fff);border-style:solid">
+            <div class="blab" style="color:color-mix(in srgb,var(--a) 58%,var(--color-text-primary))"><span class="yn alt">②③ 普通到店</span></div>
+            <div class="node c-a"><b>普通到店 spa 需求</b><small>付款方式：QR / 转账（已付款 → 链路 A）或 现金到店（未付款 → 链路 B）</small></div>
+          </div>
+          <div class="branch" style="border-color:color-mix(in srgb,var(--a) 50%,transparent);background:color-mix(in srgb,var(--a) 5%,#fff);border-style:solid">
+            <div class="blab" style="color:color-mix(in srgb,var(--a) 58%,var(--color-text-primary))"><span class="yn alt">④ 外派 · 独立业务类型</span></div>
+            <div class="node c-a"><b>外派需求</b><small>付款方式：QR / 转账 · 收款后安排技师上门 · 不进预约总账</small></div>
+          </div>
+          <div class="branch" style="border-color:color-mix(in srgb,var(--a) 50%,transparent);background:color-mix(in srgb,var(--a) 5%,#fff)">
+            <div class="blab" style="color:color-mix(in srgb,var(--a) 58%,var(--color-text-primary))"><span class="yn alt">⑤ BK 区 · 独立线下渠道</span></div>
+            <div class="node c-a"><b>BK 区需求</b><small>独立线下买单 · 每周人工对账后补入小ONE台账（走旁路，不发散客群）</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="down">↓</div>
+
+  <div class="band">
+    <div class="bh"><span class="bn">3</span><span class="bt">小ONE 处理层</span><span class="bsub">入库 · 标准化 · 散客群通知</span></div>
+    <div class="bz">
+      <div class="row">
+        <div class="node c-g"><b>自动抓取官网已付款订单</b><small>WooCommerce 已付款 → 自动入库</small></div>
+        <div class="node c-a"><b>人工提交订单</b><small>QR / 现金 / 外派 · 人工确认后交小ONE（BK 区见下方旁路）</small></div>
+      </div>
+      <div class="down">↓</div>
+      <div class="node c-p"><b>小ONE 标准化字段</b><small>客户 · 项目 · 金额 · 付款证明 · 服务时间 · 履约状态 · 技师 · 来源</small></div>
+      <div class="down">↓</div>
+      <div class="node c-p"><b>小ONE 入库（订单台账 / Commission Ledger）</b><small>统一入库 · 跟踪「付款 / 履约 / 退款」三个状态轴 · 抽成结算证据</small></div>
+      <div class="down">↓</div>
+      <div class="dec">◇ 判断 2：是否已付款？<small>已付款走链路 A · 未付款走链路 B</small></div>
+      <div class="down">↓</div>
+      <div class="node c-p"><b>小ONE 发送散客群通知</b><small>已付款 = 正常通知；未付款 = 明确标注「未付款 / 到店付款」</small></div>
+
+      <div class="bypass">
+        <div class="bp-h"><span class="bp-tag">BK 区旁路 · 非实时</span>线下买单，不进散客群实时链路</div>
+        <div class="bp-row">
+          <span class="bp-step">BK 区线下买单</span><span class="arr">→</span>
+          <span class="bp-step">每周人工对账</span><span class="arr">→</span>
+          <span class="bp-step">补入小ONE台账（付款 / 履约 / 退款）</span><span class="arr">→</span>
+          <span class="bp-step bp-dest">↘ 直达第 6 层 · 抽成准入判断</span>
+        </div>
+        <div class="bp-note">不发散客群 · 不经前台实时打单（BK 线下已收银）· 仅每周对账后并入结算</div>
+      </div>
+    </div>
+  </div>
+  <div class="down">↓</div>
+
+  <div class="band">
+    <div class="bh"><span class="bn">4</span><span class="bt">门店执行层</span><span class="bsub">打单 = 入账</span></div>
+    <div class="bz">
+      <div class="node"><b>散客群收到通知</b><small>这里就是前台收到「打单指令」的地方</small></div>
+      <div class="down">↓</div>
+      <div class="node"><b>前台查看付款证明</b><small>按判断 2 的付款状态决定打单时机</small></div>
+      <div class="down">↓ 按是否已付款分流 ↓</div>
+      <div class="fork">
+        <div class="branch A">
+          <div class="blab A"><span class="yn y">是 · 已付款</span>链路 A</div>
+          <div class="node c-g"><b>马上打单入账</b><small>付款后立即打单，<b>不等客户到店</b></small></div>
+        </div>
+        <div class="branch B">
+          <div class="blab B"><span class="yn n">否 · 未付款</span>链路 B</div>
+          <div class="node c-r"><b>客户到店 → 前台先收款</b><small>到店当场完成收款</small></div>
+          <div class="down" style="margin:5px 0">↓</div>
+          <div class="node c-r"><b>再打单入账</b><small>收款确认后才打单</small></div>
+        </div>
+      </div>
+      <div class="mergebar">两条链路在此合流 ↓</div>
+      <div class="node c-n"><b>进入 One Spa ERP / 收银系统</b><small>打单 = 正式入账，进入 One Spa 最终财务事实源</small></div>
+    </div>
+  </div>
+  <div class="down">↓</div>
+
+  <div class="band">
+    <div class="bh"><span class="bn">5</span><span class="bt">履约 / 核销层</span><span class="bsub">标绿 = 到店核销（≠ 入账）</span></div>
+    <div class="bz">
+      <div class="node"><b>进入履约阶段</b><small>按订单类型分三种履约路径 · 履约状态统一回写小ONE台账</small></div>
+      <div class="down">↓</div>
+      <div class="dec" style="background:var(--p)">◇ 判断 3：哪一种履约方式？</div>
+      <div class="down">↓</div>
+      <div class="fork three">
+        <div class="branch" style="border-color:color-mix(in srgb,var(--l) 50%,transparent);background:color-mix(in srgb,var(--l) 6%,#fff);border-style:solid">
+          <div class="blab" style="color:color-mix(in srgb,var(--l) 52%,var(--color-text-primary))"><span class="yn" style="background:var(--l)">到店履约</span></div>
+          <div class="node c-l"><b>客户按预约到店 → 前台接待 → 预约总账标绿</b><small>= 已到店 / 已履约 / 已核销 —— 仅是履约状态，<b>不代表财务入账</b></small></div>
+        </div>
+        <div class="branch" style="border-color:color-mix(in srgb,var(--a) 50%,transparent);background:color-mix(in srgb,var(--a) 5%,#fff);border-style:solid">
+          <div class="blab" style="color:color-mix(in srgb,var(--a) 58%,var(--color-text-primary))"><span class="yn alt">外派履约</span></div>
+          <div class="node c-a"><b>技师完成上门服务 → 小ONE 标记履约完成</b><small>不进预约总账；履约状态回写小ONE 台账</small></div>
+        </div>
+        <div class="branch" style="border-color:color-mix(in srgb,var(--a) 50%,transparent);background:color-mix(in srgb,var(--a) 5%,#fff)">
+          <div class="blab" style="color:color-mix(in srgb,var(--a) 58%,var(--color-text-primary))"><span class="yn alt">BK 区履约 · 旁路</span></div>
+          <div class="node c-a"><b>每周对账确认 已消费 / 已完成 → 小ONE 标记履约</b><small>不进预约总账；线下消费完成后周对账回写</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="down">↓</div>
+
+  <div class="band">
+    <div class="bh"><span class="bn">6</span><span class="bt">结算 / 对账层</span><span class="bsub">抽成只认「履约 + 未退款」</span></div>
+    <div class="bz">
+      <div class="row">
+        <div class="node c-n"><b>ERP / 收银</b><small>One Spa 最终财务账 · 唯一财务事实源</small></div>
+        <div class="node c-p"><b>小ONE 台账（全部已入库订单）</b><small>每张订单三个独立状态轴：付款状态 / 履约状态 / 退款状态</small></div>
+      </div>
+      <div class="down">↓</div>
+      <div class="dec" style="background:var(--r)">◇ 抽成准入：履约完成 且 未退款？</div>
+      <div class="down">↓</div>
+      <div class="fork">
+        <div class="branch A">
+          <div class="blab A"><span class="yn y">是</span>进抽成池</div>
+          <div class="node c-p"><b>可主张抽成订单池</b><small>仅含「已履约 且 未退款」订单 · 不含全店 walk-in</small></div>
+        </div>
+        <div class="branch B">
+          <div class="blab B"><span class="yn n">否</span>剔除</div>
+          <div class="node c-r"><b>不参加抽成</b><small>已付款但未履约 / 已退款 —— 哪怕钱已收，也不算</small></div>
+        </div>
+      </div>
+      <div class="mergebar">⊖ 退款扣除：已入池订单若事后退款 → 从抽成基数扣回 ↓</div>
+      <div class="node c-p"><b>按周 / 月生成抽成结算报表</b><small>基数 = 已履约 且 未退款 · 退款逐笔扣除</small></div>
+      <div class="formula">
+        <div class="f1">可抽成金额 = 归属小ONE渠道 + 已履约 + 未退款 的<b>净金额</b></div>
+        <div class="f2">部分退款 → 净额 = 付款金额 − 退款金额　|　全额退款 → 0　|　已付款但未履约 → 0</div>
+      </div>
+      <div class="down">↓</div>
+      <div class="node"><b>与 One Spa 对账结算</b><small>ERP 为财务底；小ONE 抽成池为主张证据；BK 区每周并入对账</small></div>
+    </div>
+  </div>
+
+</div>
+
+<aside class="rules">
+  <div class="rules-h">关键规则说明</div>
+  <ul>
+    <li><span class="eq no">小ONE ≠ ERP</span><small>小ONE 是订单入口 / 入库 / 通知 / 抽成证据；ERP 才是财务系统。</small></li>
+    <li><span class="eq no">预约总账 ≠ 最终财务系统</span><small>预约总账只是前台准备与到店标绿工具。</small></li>
+    <li><span class="eq ok">打单 = 入账</span><small>前台打单 → 正式进入 One Spa ERP / 收银。</small></li>
+    <li><span class="eq ok">标绿 = 到店核销</span><small>= 已到店 / 已履约，不等于财务入账。</small></li>
+    <li><span class="eq ok">抽成 = 履约 且 未退款</span><small>付款只是必要条件，不是充分条件。</small></li>
+    <li><span class="eq no">付款 ≠ 可抽成</span><small>未履约 / 已退款一律剔除；退款从基数扣回。</small></li>
+    <li><span class="eq ok">可抽成 = 履约 + 未退款 的净额</span><small>台账三轴：付款 / 履约 / 退款。部分退款扣退款额，全额退款记 0。</small></li>
+    <li><b>已付款订单</b><small>付款后马上打单，<b>不等客户到店</b>。</small></li>
+    <li><b>未付款订单</b><small>客户到店收款后，<b>才</b>打单入账。</small></li>
+    <li><b>BK 区 = 线下买单 · 旁路 · 每周对账</b><small>不进散客群实时链路；外派也不进预约总账，履约均回写小ONE 台账。</small></li>
+    <li><b>小ONE 台账只记可主张抽成订单证据</b><small>不记录全店所有 walk-in。</small></li>
+  </ul>
+</aside>
+
+</div>
+</div>
+</body>
+</html>
