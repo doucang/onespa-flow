@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Document</title>
+<style>
+@page {
+  size: A4;
+  margin: 18mm 15mm;
+  @bottom-center { content: "CONFIDENTIAL    第 " counter(page) " 页"; font-size: 8pt; color: #999; }
+}
+@page :first { @bottom-center { content: "CONFIDENTIAL"; } }
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "SimSun", serif; font-size: 13pt; line-height: 1.8; color: #333; }
+
+/* Cover */
+.cover { page-break-after: always; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 90vh; text-align: center; }
+.cover-line { width: 60%; height: 2px; background: linear-gradient(90deg, transparent, #c8a45a, transparent); margin: 25px auto; }
+.cover h1 { font-family: "STHeiti", "Heiti SC", "Noto Sans CJK SC", "SimHei", sans-serif; font-size: 28pt; color: #1a1a2e; margin: 10px 0; font-weight: bold; border: none; page-break-before: avoid; }
+.cover .subtitle { font-size: 14pt; color: #0f3460; margin: 20px 0 40px; letter-spacing: 2px; }
+.cover .info { font-size: 10pt; color: #666; margin: 3px 0; }
+
+/* Headings */
+h1 { font-family: "STHeiti", "Heiti SC", "Noto Sans CJK SC", "SimHei", sans-serif; font-size: 18pt; color: #1a1a2e; margin: 0 0 5mm; padding-bottom: 3mm; border-bottom: 2px solid #c8a45a; page-break-before: always; }
+h1:first-of-type { page-break-before: avoid; }
+.no-break-before { page-break-before: avoid !important; }
+h2 { font-family: "STHeiti", "Heiti SC", "Noto Sans CJK SC", "SimHei", sans-serif; font-size: 14pt; color: #0f3460; margin: 7mm 0 3mm; page-break-after: avoid; }
+h1 + h2 { margin-top: 3mm; }
+h3 { font-family: "STHeiti", "Heiti SC", "Noto Sans CJK SC", "SimHei", sans-serif; font-size: 13.5pt; color: #16213e; margin: 4mm 0 2mm; page-break-after: avoid; }
+p { margin: 2mm 0 3mm; }
+strong { font-family: "STHeiti", "Heiti SC", "Noto Sans CJK SC", "SimHei", sans-serif; color: #1a1a2e; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; margin: 3mm 0 5mm; font-size: 10pt; page-break-inside: avoid; }
+thead { background: #1a1a2e; color: #fff; display: table-header-group; }
+th { padding: 6px 8px; text-align: center; font-family: "STHeiti", "Heiti SC", "Noto Sans CJK SC", "SimHei", sans-serif; font-weight: bold; border-bottom: 2px solid #c8a45a; }
+th:first-child { text-align: left; }
+td { padding: 6px 8px; border: 0.5px solid #d4d0c8; vertical-align: top; }
+td:first-child { font-family: "STHeiti", "Heiti SC", "Noto Sans CJK SC", "SimHei", sans-serif; font-weight: 700; }
+tr:nth-child(even) { background: #f0efe8; }
+.red { color: #c0392b; font-family: "STHeiti", "Heiti SC", "Noto Sans CJK SC", "SimHei", sans-serif; background: #fde8e8; padding: 1px 4px; border-radius: 2px; }
+.fee-table td:nth-child(n+2) { text-align: right; }
+.fee-table th:nth-child(n+2) { text-align: right; }
+.long-table { page-break-inside: auto; }
+.long-table thead { display: table-header-group; }
+
+/* Blockquote & special */
+blockquote { background: #f5f0e6; border-left: 4px solid #c8a45a; padding: 10px 16px; margin: 4mm 0; font-size: 11pt; color: #333; }
+ul { margin: 2mm 0; padding-left: 6mm; }
+li { margin-bottom: 2mm; line-height: 1.7; }
+.note { font-size: 9pt; color: #666; font-style: italic; margin: 2mm 0; padding-left: 5mm; border-left: 2px solid #d4d0c8; }
+.section { margin-bottom: 5mm; }
+.key3 { background: #fff8e6; border: 2px solid #c8a45a; border-radius: 4px; padding: 10px 16px; margin: 4mm 0 5mm; font-family: "STHeiti", "Heiti SC", "Noto Sans CJK SC", "SimHei", sans-serif; font-size: 10.5pt; color: #1a1a2e; page-break-after: avoid; }
+.footer-note { font-size: 9pt; color: #1a1a2e; font-style: italic; text-align: center; margin-top: 20mm; }
+
+/* Code & pre — CJK fallback prevents Chinese character loss in monospace blocks */
+code { font-family: "SF Mono", "Menlo", "Monaco", "Consolas", "Songti SC", "STSong", "Noto Serif CJK SC", "SimSun", monospace, serif; font-size: 10pt; background: #f0efe8; padding: 1px 4px; border-radius: 2px; color: #1a1a2e; }
+pre { background: #f5f5f5; padding: 8px 12px; border-radius: 4px; margin: 3mm 0 5mm; font-size: 10pt; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; page-break-inside: avoid; border-left: 3px solid #d4d0c8; }
+pre code { background: transparent; padding: 0; font-family: "SF Mono", "Menlo", "Monaco", "Consolas", "Songti SC", "STSong", "Noto Serif CJK SC", "SimSun", monospace, serif; color: #333; }
+</style>
+</head>
+<body>
+<h1>One Spa 客服运营日报</h1>
+<p><strong>2026-06-23（星期一）· 管理层版</strong></p>
+<p>数据来源：respond.io 全量对话（70 段）+ WooCommerce 订单台账　·　统计口径：吉隆坡时区 00:00–23:59　·　生成方式：AI 全量阅读当日对话提炼</p>
+<blockquote>
+<p>本版客户手机已脱敏（仅尾 4 位）、姓名仅留首字；完整追单名单（含手机）仅在客服群内部可见。</p>
+</blockquote>
+<hr>
+<h2>一、核心指标</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>新进线</td>
+<td><strong>61</strong></td>
+<td>全部 New Lead；Open 53 / Close 8；<strong>全部未分配负责人</strong></td>
+</tr>
+<tr>
+<td>咨询客户</td>
+<td><strong>70</strong></td>
+<td>当日主动发消息的独立客户（新客 61 + 老客回头 9）</td>
+</tr>
+<tr>
+<td>有效聊天</td>
+<td><strong>68 / 70（97%）</strong></td>
+<td>获得回复者；其中来回 ≥2 轮 41、深聊 39</td>
+</tr>
+<tr>
+<td>进站 / 出站消息</td>
+<td><strong>392 / 342</strong></td>
+<td>出站全人工（WhatsApp App 336 + 模板 6，<strong>未启用 AI</strong>）</td>
+</tr>
+<tr>
+<td>首次响应</td>
+<td>中位 <strong>1.4 分钟</strong></td>
+<td>但 <strong>13 单 &gt;1 小时、2 单全程零回复</strong>，集中在深夜与早间 09:30 前</td>
+</tr>
+<tr>
+<td>成交</td>
+<td><strong>6 单 / RM 1,794.78</strong></td>
+<td>买一送一 ×5、扬州搓澡 ×2、世界杯夜 ×1</td>
+</tr>
+<tr>
+<td>客源地</td>
+<td>马来西亚 59 · 新加坡 1 · 澳洲 1</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>二、待追回客户（完整含手机的名单见客服群）</h2>
+<h3>P1｜团体大单，优先当日联系</h3>
+<table>
+<thead>
+<tr>
+<th>客户</th>
+<th>手机（脱敏）</th>
+<th>事实经过</th>
+<th>建议动作</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grace</td>
+<td>60***1997</td>
+<td>10–15 人团，主动问团体按摩；客服回"帮你找最划算套餐"后<strong>未再回复</strong></td>
+<td>补发 B1F1×7 张 + RM99 生日票 + 按摩加购 8 折总价 + 下单链接</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>Eve</td>
+<td>60***6083</td>
+<td>6 人团已到店，前台告知"当天买不能用"且态度差，客户连发"不会再来""走了"</td>
+<td>经理致歉 + 一次性破例当天可用 + 电话回访</td>
+<td>☐</td>
+</tr>
+</tbody>
+</table>
+<h3>P2｜明确意向被晾置 / 漏接</h3>
+<table>
+<thead>
+<tr>
+<th>客户</th>
+<th>手机（脱敏）</th>
+<th>事实经过</th>
+<th>建议动作</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Khai</td>
+<td>60***8627</td>
+<td>19:31 发"我想预约"，<strong>全程零回复</strong></td>
+<td>补欢迎语 + 套餐 + 问"几位、几号"</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>Annie</td>
+<td>60***0127</td>
+<td>已给"两人、平日"，客服仅回"自行上官网下单"</td>
+<td>直接推 B1F1 RM169/2 人 + 下单链接</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>Ron</td>
+<td>60***0388</td>
+<td>3–5 人团问"线上付款怎么确保安全"，被错字回复"你管我…"</td>
+<td>致歉 + 付款安全说明 + 发链接</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>Jin</td>
+<td>60***8180</td>
+<td>反复比价至最后疑虑，客服答完未促成</td>
+<td>"过夜推 B1F1 / 看球推 218，您哪天来？"二选一收口</td>
+<td>☐</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>三、成交障碍分析（结构性，按影响排序）</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>障碍</th>
+<th>当日事实证据</th>
+<th>改进建议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>客户不信任线上付款</td>
+<td>Ron 问"如何确保线上买票安全"；客服自述"好多人不相信线上下单"</td>
+<td>统一安全话术：官网域名 + 支持付款方式 + 下单后凭码到店核验</td>
+</tr>
+<tr>
+<td>2</td>
+<td>到店无优惠 + 前台态度</td>
+<td>Eve 6 人团到店后流失</td>
+<td>给前台扫码代客下单能力 / 优惠授权</td>
+</tr>
+<tr>
+<td>3</td>
+<td>系统锁时间 + 客服口径矛盾</td>
+<td>同一客服一边"当天可用"一边"系统锁死"</td>
+<td>统一口径 + 开通"当天可用"通道</td>
+</tr>
+<tr>
+<td>4</td>
+<td>报价不含税（++18%）</td>
+<td>客户"还有 ++？"</td>
+<td>客服直接报含税一口价</td>
+</tr>
+<tr>
+<td>5</td>
+<td>促销结构复杂，客服需现算</td>
+<td>客服现算"2826 vs 2300…"，客户"这和普通优惠没区别"</td>
+<td>制作"人数 → 推荐套餐 → 一口价"对照卡</td>
+</tr>
+<tr>
+<td>6</td>
+<td>12 小时 / 过夜认知冲突</td>
+<td>客户问能否过夜，被"最多 12 小时"劝退</td>
+<td>话术改："24 小时营业，套餐含 12 小时停留，晚上来可泡到早上"</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>四、服务质量问题（可立即纠正）</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>事实</th>
+<th>纠正</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>深夜 / 早间响应积压</td>
+<td>13 单 &gt;1 小时、2 单零回复，凌晨咨询多拖到 09:30 统一补</td>
+<td>增设深夜值守 / 早班首件事跟进 / 自动首响</td>
+</tr>
+<tr>
+<td>答非所问、漏回</td>
+<td>private room 被问两次才答；"含不含 batin"以套餐模板搪塞</td>
+<td>先正面答客户问题，再推套餐</td>
+</tr>
+<tr>
+<td>答完不收口</td>
+<td>多个高意向客户答完疑虑后未发链接、未约时间</td>
+<td>每次答疑后固定收口："哪天来？链接给您"</td>
+</tr>
+<tr>
+<td>回复碎片化</td>
+<td>一句话拆成十余条发送</td>
+<td>一次性结构化回复</td>
+</tr>
+<tr>
+<td>错字 / 不当用语</td>
+<td>"你管我…"、😂 回应投诉、"都是按规矩做事"</td>
+<td>关键节点核对用词，先共情后解释</td>
+</tr>
+<tr>
+<td>正面范本（推广）</td>
+<td>耐心拆解促销引导下单、健康风险稳妥应对</td>
+<td>沉淀为标准话术</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>五、高频咨询 Top（建议做成快捷话术，可使首响提速一半）</h2>
+<p>价格 / 套餐　≫　能否过夜（24h / 12h）　&gt;　到店能否付款　&gt;　private room / 隐私　&gt;　套餐区别（218 vs 199）　&gt;　生日优惠　&gt;　是否正规经营</p>
+<hr>
+<h2>六、运营 / 售后（建议管理层处理）</h2>
+<table>
+<thead>
+<tr>
+<th>事项</th>
+<th>事实（对话）</th>
+<th>建议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>前台找零差错</td>
+<td>客户付 400、消费三百余，未找零（手牌 8035）</td>
+<td>收银 / 找零复核流程</td>
+</tr>
+<tr>
+<td>退款无统一台账</td>
+<td>退单靠群手工传、订单号搞混</td>
+<td>建立退款登记台账</td>
+</tr>
+<tr>
+<td>产品页未标注清真</td>
+<td>客户下单后发现非清真要求取消</td>
+<td>官网 / 页面明确标注 halal 状态</td>
+</tr>
+<tr>
+<td>商场装修噪音</td>
+<td>在店客户投诉吵、要耳塞</td>
+<td>备耳塞 + 安静区预案</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><strong>数据说明</strong>：进线 / 状态来自联系人导出，消息与对话来自 respond.io 全量记录；"有效聊天 / 首响 / 待追回"均由逐段对话实算，非 respond.io 会话报表（该报表仅含 auto_close 子集）；成交来自 WooCommerce 已付款，可能含线上直接下单，不强行归因为当日咨询转化。客户手机已脱敏。</p>
+</body>
+</html>
