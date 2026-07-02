@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>壹号汤泉 · 客户自付款单生成器</title>
+<style>
+  :root{
+    --bg:#eef2f0; --card:#ffffff; --ink:#1f2d2a; --muted:#6b7d78;
+    --line:#dfe6e3; --accent:#0f8f6f; --accent-weak:#e4f3ee;
+    --warn:#c0501f; --warn-weak:#fbeadf; --ok:#0f8f6f; --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.6;padding:24px}
+  .wrap{max-width:1040px;margin:0 auto}
+  h1{font-size:22px;font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+  h1 .dot{width:12px;height:12px;border-radius:50%;background:var(--accent)}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  .card h2{font-size:15px;font-weight:600;margin:0 0 16px;color:var(--ink)}
+  label{display:block;font-size:13px;color:var(--muted);margin:0 0 5px}
+  input,select{width:100%;height:38px;padding:0 11px;border:1px solid var(--line);border-radius:8px;
+       font-size:14px;font-family:inherit;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-weak)}
+  .row{display:grid;gap:12px;margin-bottom:14px}
+  .row.c2{grid-template-columns:1fr 1fr}
+  .row.c3{grid-template-columns:1fr 1fr 1fr}
+  .pkg{display:grid;grid-template-columns:1fr 64px 96px 32px;gap:8px;margin-bottom:8px;align-items:center}
+  .pkg input{height:34px}
+  .del{height:34px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;color:var(--warn);font-size:16px;line-height:1}
+  .addbtn{margin-top:4px;padding:8px 14px;border:1px dashed var(--accent);background:var(--accent-weak);
+       color:var(--accent);border-radius:8px;cursor:pointer;font-size:13px;font-weight:500}
+  .hint{font-size:12px;color:var(--muted);margin-top:5px}
+  .checkbar{margin:14px 0 0;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:500}
+  .checkbar.ok{background:var(--accent-weak);color:var(--ok)}
+  .checkbar.warn{background:var(--warn-weak);color:var(--warn)}
+  .preview{background:#0b141a;border-radius:var(--radius);padding:18px;min-height:120px}
+  .bubble{background:#dcf8c6;color:#111b21;border-radius:10px;padding:14px 16px;font-size:14px;
+       white-space:pre-wrap;word-break:break-word;font-family:-apple-system,"PingFang SC",sans-serif;
+       box-shadow:0 1px 1px rgba(0,0,0,.15);max-width:100%}
+  .copybtn{margin-top:14px;width:100%;height:44px;border:none;border-radius:10px;background:var(--accent);
+       color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+  .copybtn:active{transform:scale(.99)}
+  .copybtn.done{background:#0b6e54}
+  .tip{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="dot"></span>壹号汤泉 · 客户自付款单生成器</h1>
+  <p class="sub">左边填资料，右边自动生成散客群通知，点一下复制，直接粘贴到 WhatsApp。</p>
+  <div class="grid">
+    <div class="card">
+      <h2>填写资料</h2>
+      <div class="row c2">
+        <div><label>客户姓名</label><input id="name" placeholder="陈美丽"></div>
+        <div><label>手机号</label><input id="phone" placeholder="0123456789"></div>
+      </div>
+      <div class="row c2">
+        <div><label>到店日期</label><input id="date" type="date"></div>
+        <div><label>到店时间</label><input id="time" type="time"></div>
+      </div>
+      <div class="row c3">
+        <div><label>男</label><input id="male" type="number" min="0" value="0"></div>
+        <div><label>女</label><input id="female" type="number" min="0" value="0"></div>
+        <div><label>小孩</label><input id="child" type="number" min="0" value="0"></div>
+      </div>
+
+      <label style="margin-top:6px">套餐（可加多个）</label>
+      <div id="pkgs"></div>
+      <button class="addbtn" onclick="addPkg()">+ 加一个套餐</button>
+
+      <div class="row c2" style="margin-top:16px">
+        <div><label>实付金额 RM</label><input id="paid" type="number" min="0" step="0.01" placeholder="234.82"></div>
+        <div><label>付款方式</label>
+          <select id="method">
+            <option>DuitNow QR</option><option>TNG eWallet</option>
+            <option>银行转账 Bank Transfer</option><option>支付宝 Alipay</option>
+            <option>现金 Cash</option><option>其他</option>
+          </select>
+        </div>
+      </div>
+      <div class="row c2">
+        <div><label>付款参考号</label><input id="ref" placeholder="截图上的 Reference No."></div>
+        <div><label>付款时间</label><input id="ptime" placeholder="07月02日 15:17"></div>
+      </div>
+      <div class="row"><div><label>经手客服（选填）</label><input id="staff" placeholder="Darrell"></div></div>
+
+      <div id="check" class="checkbar ok">金额待填写</div>
+    </div>
+
+    <div class="card">
+      <h2>散客群通知预览</h2>
+      <div class="preview"><div class="bubble" id="preview">填写左边资料，这里会自动生成…</div></div>
+      <button class="copybtn" id="copy" onclick="copyText()">复制通知</button>
+      <p class="tip">复制后到 WhatsApp 散客群粘贴发送。星号 *…* 在 WhatsApp 里会显示为粗体。</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function el(id){return document.getElementById(id)}
+function addPkg(name,qty,amt){
+  const box=el('pkgs');const div=document.createElement('div');div.className='pkg';
+  div.innerHTML='<input placeholder="套餐名，例 搓澡+门票" class="pn">'+
+    '<input type="number" min="1" value="'+(qty||1)+'" class="pq" title="数量">'+
+    '<input type="number" min="0" step="0.01" placeholder="金额" class="pa" title="金额RM">'+
+    '<button class="del" title="删除">×</button>';
+  if(name)div.querySelector('.pn').value=name;
+  if(amt!=null)div.querySelector('.pa').value=amt;
+  div.querySelector('.del').onclick=()=>{div.remove();render()};
+  div.querySelectorAll('input').forEach(i=>i.addEventListener('input',render));
+  box.appendChild(div);render();
+}
+function pkgs(){
+  return [...document.querySelectorAll('.pkg')].map(p=>({
+    name:p.querySelector('.pn').value.trim(),
+    qty:parseInt(p.querySelector('.pq').value)||0,
+    amt:parseFloat(p.querySelector('.pa').value)||0
+  })).filter(p=>p.name||p.amt);
+}
+function money(n){return 'RM'+(Math.round(n*100)/100).toFixed(2)}
+function fmtDate(){
+  const d=el('date').value,t=el('time').value;if(!d)return'';
+  const[y,m,day]=d.split('-');let s=y+'年'+m+'月'+day+'日';if(t)s+=' '+t;return s;
+}
+function paxStr(){
+  const m=+el('male').value||0,f=+el('female').value||0,c=+el('child').value||0;
+  const tot=m+f+c;if(!tot)return'';
+  let parts=[];if(m)parts.push('男'+m);if(f)parts.push('女'+f);if(c)parts.push('小孩'+c);
+  return tot+'人（'+parts.join(' ')+'）';
+}
+function render(){
+  const ps=pkgs();
+  const sum=ps.reduce((a,p)=>a+p.amt,0);
+  const paid=parseFloat(el('paid').value)||0;
+  // amount check
+  const chk=el('check');
+  if(!paid&&!sum){chk.className='checkbar ok';chk.textContent='金额待填写';}
+  else if(Math.abs(sum-paid)<=0.01){chk.className='checkbar ok';chk.textContent='✓ 套餐合计 '+money(sum)+' = 实付 '+money(paid);}
+  else{chk.className='checkbar warn';chk.textContent='⚠ 套餐合计 '+money(sum)+' 与实付 '+money(paid)+' 不一致，请核对';}
+  // build message
+  const L=[];
+  L.push('🧖 *壹号汤泉 · 客户到店预约*');
+  L.push('━━━━━━━━━━━━━');
+  L.push('👤 客户：'+(el('name').value.trim()||'—'));
+  L.push('📱 电话：'+(el('phone').value.trim()||'—'));
+  const dt=fmtDate();L.push('📅 到店：'+(dt||'—'));
+  const px=paxStr();if(px)L.push('👥 人数：'+px);
+  L.push('');
+  L.push('🎫 套餐：');
+  if(ps.length)ps.forEach(p=>L.push('   • '+(p.name||'—')+' ×'+(p.qty||1)+' — '+money(p.amt)));
+  else L.push('   • —');
+  L.push('');
+  L.push('💰 实付：'+money(paid));
+  L.push('💳 付款方式：'+el('method').value);
+  if(el('ref').value.trim())L.push('🔖 参考号：'+el('ref').value.trim());
+  if(el('ptime').value.trim())L.push('🕐 付款时间：'+el('ptime').value.trim());
+  L.push('━━━━━━━━━━━━━');
+  L.push('📌 前台请按预约时间安排到店 🙏');
+  if(el('staff').value.trim())L.push('（录单：'+el('staff').value.trim()+'）');
+  el('preview').textContent=L.join('\n');
+}
+function copyText(){
+  const t=el('preview').textContent;
+  navigator.clipboard.writeText(t).then(()=>{
+    const b=el('copy');b.textContent='✓ 已复制';b.classList.add('done');
+    setTimeout(()=>{b.textContent='复制通知';b.classList.remove('done')},1600);
+  });
+}
+document.querySelectorAll('input,select').forEach(i=>i.addEventListener('input',render));
+addPkg('',1,'');
+render();
+</script>
+</body>
+</html>
