@@ -323,34 +323,34 @@ function render(){
   const L=[];
   L.push('🧾 *小ONE：客服自付款单*');
   L.push('');
-  L.push('单号：SP-（系统入库后生成）');
-  L.push('客户：'+(el('name').value.trim()||'未提供')+'｜'+(el('phone').value.trim()||'—'));
+  L.push('🔖 单号：SP-（系统入库后生成）');
+  L.push('👤 客户：'+(el('name').value.trim()||'未提供')+'｜'+(el('phone').value.trim()||'—'));
   L.push('');
   const its = rows.filter(r=>r.name||r.kind==='custom');
   if(its.length===1 && !its[0].disc){
-    L.push('商品：'+(its[0].name||'—'));
-    L.push('数量：'+(its[0].qty||1));
+    L.push('🎫 商品：'+(its[0].name||'—'));
+    L.push('　　数量：'+(its[0].qty||1));
   }else if(its.length){
-    L.push('商品：');
+    L.push('🎫 商品：');
     its.forEach(r=>{
       let line='- '+(r.name||'—')+' ×'+(r.qty||1)+' — '+money(rowAmount(r));
       if(r.disc) line+='（原'+money(r.priceCent*(r.qty||1))+' 8折）';
       L.push(line);
     });
-  }else{ L.push('商品：—'); }
-  const px=paxStr(); L.push('人数：'+(px||'—'));
+  }else{ L.push('🎫 商品：—'); }
+  const px=paxStr(); L.push('👥 人数：'+(px||'—'));
   L.push('');
-  L.push('预约入场：'+(fmtDate()||'—'));
-  L.push('到店状态：待到店');
+  L.push('📅 预约入场：'+(fmtDate()||'—'));
+  L.push('🚪 到店状态：待到店');
   L.push('');
-  L.push('金额：'+money(paid||total)+'（商品 '+money(sub)+' + 税费 '+money(sc+sst)+'）');
-  let payline='支付：'+el('method').value+'｜状态：已付款·客服已核实';
-  if(el('ptime').value.trim()) payline+='｜付款：'+el('ptime').value.trim();
+  L.push('💰 金额：'+money(paid||total)+'（商品 '+money(sub)+' + 税费 '+money(sc+sst)+'）');
+  let payline='💳 支付：'+el('method').value+'｜已付款·客服已核实';
+  if(el('ptime').value.trim()) payline+='｜'+el('ptime').value.trim();
   L.push(payline);
-  if(el('ref').value.trim()) L.push('参考号：'+el('ref').value.trim());
+  if(el('ref').value.trim()) L.push('🔢 参考号：'+el('ref').value.trim());
   L.push('');
-  L.push('来源：客服录单（官网外收款）');
-  L.push('📌 前台请按预约时间安排到店，凭参考号核销。');
+  L.push('📍 来源：客服录单（官网外收款）');
+  L.push('📌 前台请按预约时间安排到店，凭参考号核销 🙏');
   if(el('staff').value.trim()) L.push('（录单：'+el('staff').value.trim()+'）');
   el('preview').textContent = L.join('\n');
 }
@@ -392,10 +392,10 @@ function buildSubmit(){
   L.push('小孩：'+(+el('child').value||0));
   L.push('');
   L.push('付款方式：'+el('method').value);
+  if(el('ptime').value.trim()) L.push('付款时间：'+el('ptime').value.trim());
   const extra=[];
   if(el('staff').value.trim()) extra.push('录单 '+el('staff').value.trim());
   if(el('ref').value.trim()) extra.push('流水号 '+el('ref').value.trim());
-  if(el('ptime').value.trim()) extra.push('付款时间 '+el('ptime').value.trim());
   L.push('备注：'+(extra.join('｜')||'—'));
   return L.join('\n');
 }
