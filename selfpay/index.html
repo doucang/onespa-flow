@@ -113,8 +113,10 @@
     <div class="card">
       <h2>散客群通知预览</h2>
       <div class="preview"><div class="bubble" id="preview">左边选好项目，这里自动生成…</div></div>
-      <button class="copybtn" id="copy" onclick="copyText()">复制通知</button>
-      <p class="tip">复制后到 WhatsApp 散客群粘贴发送。*…* 在 WhatsApp 里显示为粗体。</p>
+      <button class="copybtn" id="copysub" onclick="copySubmit()">复制提交给小ONE（自动入库+发群）</button>
+      <p class="tip">粘贴到<b>客服群</b>发送，<b>同一条消息附上付款截图</b>。系统核对通过出卡后，回复「@小ONE 已核实」即完成发群。</p>
+      <button class="copybtn" id="copy" onclick="copyText()" style="background:#fff;color:var(--accent);border:1.5px solid var(--accent);margin-top:8px">复制散客群通知（备用·人工发群）</button>
+      <p class="tip">仅在系统不可用时人工发散客群用。*…* 在 WhatsApp 里显示为粗体。</p>
     </div>
   </div>
 </div>
@@ -352,7 +354,60 @@ function render(){
 function copyText(){
   navigator.clipboard.writeText(el('preview').textContent).then(()=>{
     const b=el('copy'); b.textContent='✓ 已复制'; b.classList.add('done');
-    setTimeout(()=>{b.textContent='复制通知'; b.classList.remove('done')},1600);
+    setTimeout(()=>{b.textContent='复制散客群通知（备用·人工发群）'; b.classList.remove('done')},1600);
+  });
+}
+
+// 提交块：intake 兼容模板（机器确定性解析入库用）
+function buildSubmit(){
+  const {sub, sc, sst, total} = calc();
+  const paid = Math.round((parseFloat(el('paid').value)||0)*100);
+  const L=[];
+  L.push('@小ONE selfpay paid');
+  L.push('');
+  L.push('客户姓名：'+(el('name').value.trim()||'未提供'));
+  L.push('手机号：'+el('phone').value.trim());
+  L.push('预约时间：'+el('date').value+' '+el('time').value);
+  L.push('');
+  L.push('付款金额：RM '+((paid||total)/100).toFixed(2));
+  L.push('税费：RM '+((sc+sst)/100).toFixed(2));
+  L.push('');
+  let i=1;
+  rows.forEach(r=>{
+    const nm=(r.name||'').trim(); if(!nm && r.kind!=='custom') return;
+    L.push('套餐'+i);
+    L.push('套餐名：'+nm+(r.disc?'（8折）':''));
+    L.push('数量：'+(r.qty||1));
+    L.push('金额：RM'+(rowAmount(r)/100).toFixed(2));
+    L.push('');
+    i++;
+  });
+  L.push('人数');
+  L.push('男：'+(+el('male').value||0));
+  L.push('女：'+(+el('female').value||0));
+  L.push('小孩：'+(+el('child').value||0));
+  L.push('');
+  L.push('付款方式：'+el('method').value);
+  const extra=[];
+  if(el('staff').value.trim()) extra.push('录单 '+el('staff').value.trim());
+  if(el('ref').value.trim()) extra.push('流水号 '+el('ref').value.trim());
+  if(el('ptime').value.trim()) extra.push('付款时间 '+el('ptime').value.trim());
+  L.push('备注：'+(extra.join('｜')||'—'));
+  return L.join('\n');
+}
+
+function copySubmit(){
+  const paid = Math.round((parseFloat(el('paid').value)||0)*100);
+  const {total} = calc();
+  if(!rows.length || !el('phone').value.trim() || !el('date').value){
+    alert('请先填齐：手机号、到店日期时间、至少一个项目。'); return;
+  }
+  if(paid && Math.abs(paid-total)>1){
+    if(!confirm('实付与应付不一致（见黄色提示）。特殊价请直接改单价让两者一致。仍要复制吗？')) return;
+  }
+  navigator.clipboard.writeText(buildSubmit()).then(()=>{
+    const b=el('copysub'); b.textContent='✓ 已复制，去客服群粘贴（记得附截图）'; b.classList.add('done');
+    setTimeout(()=>{b.textContent='复制提交给小ONE（自动入库+发群）'; b.classList.remove('done')},2200);
   });
 }
 
