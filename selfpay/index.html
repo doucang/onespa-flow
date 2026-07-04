@@ -3,78 +3,96 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>壹号汤泉 · 客户自付款单生成器</title>
+<title>壹号汤泉 · 客户自付款单生成器 v2</title>
 <style>
   :root{
     --bg:#eef2f0; --card:#ffffff; --ink:#1f2d2a; --muted:#6b7d78;
     --line:#dfe6e3; --accent:#0f8f6f; --accent-weak:#e4f3ee;
-    --warn:#c0501f; --warn-weak:#fbeadf; --ok:#0f8f6f; --radius:12px;
+    --warn:#c0501f; --warn-weak:#fbeadf; --radius:12px;
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
-       background:var(--bg);color:var(--ink);line-height:1.6;padding:24px}
-  .wrap{max-width:1040px;margin:0 auto}
-  h1{font-size:22px;font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+       background:var(--bg);color:var(--ink);line-height:1.6;padding:20px}
+  .wrap{max-width:1080px;margin:0 auto}
+  h1{font-size:21px;font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:10px}
   h1 .dot{width:12px;height:12px;border-radius:50%;background:var(--accent)}
-  .sub{color:var(--muted);font-size:14px;margin:0 0 20px}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-  @media(max-width:860px){.grid{grid-template-columns:1fr}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
-  .card h2{font-size:15px;font-weight:600;margin:0 0 16px;color:var(--ink)}
-  label{display:block;font-size:13px;color:var(--muted);margin:0 0 5px}
-  input,select{width:100%;height:38px;padding:0 11px;border:1px solid var(--line);border-radius:8px;
+  .sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+  .grid{display:grid;grid-template-columns:1.15fr 1fr;gap:18px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .card h2{font-size:15px;font-weight:600;margin:0 0 14px}
+  label{display:block;font-size:12.5px;color:var(--muted);margin:0 0 4px}
+  input,select{width:100%;height:37px;padding:0 10px;border:1px solid var(--line);border-radius:8px;
        font-size:14px;font-family:inherit;background:#fff;color:var(--ink)}
   input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-weak)}
-  .row{display:grid;gap:12px;margin-bottom:14px}
+  .row{display:grid;gap:10px;margin-bottom:12px}
   .row.c2{grid-template-columns:1fr 1fr}
   .row.c3{grid-template-columns:1fr 1fr 1fr}
-  .pkg{display:grid;grid-template-columns:1fr 64px 96px 32px;gap:8px;margin-bottom:8px;align-items:center}
-  .pkg input{height:34px}
-  .del{height:34px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;color:var(--warn);font-size:16px;line-height:1}
-  .addbtn{margin-top:4px;padding:8px 14px;border:1px dashed var(--accent);background:var(--accent-weak);
-       color:var(--accent);border-radius:8px;cursor:pointer;font-size:13px;font-weight:500}
-  .hint{font-size:12px;color:var(--muted);margin-top:5px}
-  .checkbar{margin:14px 0 0;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:500}
-  .checkbar.ok{background:var(--accent-weak);color:var(--ok)}
+  .addbar{display:grid;grid-template-columns:1fr 96px;gap:8px;margin-bottom:10px}
+  .addbar button{height:37px;border:1px dashed var(--accent);background:var(--accent-weak);color:var(--accent);
+       border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
+  .item{display:grid;grid-template-columns:1fr 52px 84px 30px;gap:6px;margin-bottom:6px;align-items:center}
+  .item .nm{font-size:13px;padding:6px 8px;background:#f6f9f8;border:1px solid var(--line);border-radius:8px;
+       min-height:37px;display:flex;flex-direction:column;justify-content:center}
+  .item .nm .t{line-height:1.3}
+  .item .nm .d{font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .item .nm .d label{display:inline-flex;align-items:center;gap:3px;font-size:11px;margin:0;cursor:pointer;color:var(--accent)}
+  .item .nm .d input[type=checkbox]{width:13px;height:13px;margin:0}
+  .item input.qty,.item input.prc{height:34px;font-size:13px;text-align:right}
+  .del{height:34px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;color:var(--warn);font-size:15px;line-height:1}
+  .totals{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px;font-size:13.5px}
+  .totals .tr{display:flex;justify-content:space-between;padding:2px 0;color:var(--muted)}
+  .totals .tr.grand{color:var(--ink);font-weight:700;font-size:16px;border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+  .checkbar{margin:12px 0 0;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:500}
+  .checkbar.ok{background:var(--accent-weak);color:var(--accent)}
   .checkbar.warn{background:var(--warn-weak);color:var(--warn)}
-  .preview{background:#0b141a;border-radius:var(--radius);padding:18px;min-height:120px}
-  .bubble{background:#dcf8c6;color:#111b21;border-radius:10px;padding:14px 16px;font-size:14px;
-       white-space:pre-wrap;word-break:break-word;font-family:-apple-system,"PingFang SC",sans-serif;
-       box-shadow:0 1px 1px rgba(0,0,0,.15);max-width:100%}
-  .copybtn{margin-top:14px;width:100%;height:44px;border:none;border-radius:10px;background:var(--accent);
+  .notice{margin-top:8px;padding:8px 11px;border-radius:8px;font-size:12.5px;background:var(--warn-weak);color:var(--warn);display:none}
+  .preview{background:#0b141a;border-radius:var(--radius);padding:16px;min-height:200px}
+  .bubble{background:#dcf8c6;color:#111b21;border-radius:10px;padding:13px 15px;font-size:13.5px;
+       white-space:pre-wrap;word-break:break-word;box-shadow:0 1px 1px rgba(0,0,0,.15)}
+  .copybtn{margin-top:12px;width:100%;height:44px;border:none;border-radius:10px;background:var(--accent);
        color:#fff;font-size:15px;font-weight:600;cursor:pointer}
   .copybtn:active{transform:scale(.99)}
   .copybtn.done{background:#0b6e54}
-  .tip{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
+  .tip{font-size:12px;color:var(--muted);margin-top:8px;text-align:center}
+  .hintline{font-size:11.5px;color:var(--muted);margin-top:4px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1><span class="dot"></span>壹号汤泉 · 客户自付款单生成器</h1>
-  <p class="sub">左边填资料，右边自动生成散客群通知，点一下复制，直接粘贴到 WhatsApp。</p>
+  <h1><span class="dot"></span>壹号汤泉 · 客户自付款单生成器 <span style="font-size:12px;color:var(--muted);font-weight:400">v2 · 价目 2026-07-04</span></h1>
+  <p class="sub">选项目自动带价、自动算 10% 服务费 + 8% SST；含门票时官网按摩项自动 8 折。价格如与官网调整不符，以官网为准并通知更新工具。</p>
   <div class="grid">
     <div class="card">
-      <h2>填写资料</h2>
+      <h2>① 客户与到店</h2>
       <div class="row c2">
-        <div><label>客户姓名</label><input id="name" placeholder="陈美丽"></div>
-        <div><label>手机号</label><input id="phone" placeholder="0123456789"></div>
+        <div><label>客户姓名（选填）</label><input id="name" placeholder="陈美丽"></div>
+        <div><label>手机号 *</label><input id="phone" placeholder="0123456789"></div>
       </div>
       <div class="row c2">
-        <div><label>到店日期</label><input id="date" type="date"></div>
-        <div><label>到店时间</label><input id="time" type="time"></div>
+        <div><label>到店日期 *</label><input id="date" type="date"></div>
+        <div><label>到店时间 *</label><input id="time" type="time"></div>
       </div>
       <div class="row c3">
         <div><label>男</label><input id="male" type="number" min="0" value="0"></div>
         <div><label>女</label><input id="female" type="number" min="0" value="0"></div>
         <div><label>小孩</label><input id="child" type="number" min="0" value="0"></div>
       </div>
+      <div id="daynote" class="notice"></div>
 
-      <label style="margin-top:6px">套餐（可加多个）</label>
-      <div id="pkgs"></div>
-      <button class="addbtn" onclick="addPkg()">+ 加一个套餐</button>
+      <h2 style="margin-top:18px">② 项目（选了自动带价）</h2>
+      <div class="addbar">
+        <select id="pick"></select>
+        <button onclick="addPicked()">＋ 添加</button>
+      </div>
+      <div id="items"></div>
+      <div class="hintline">💡 单价可手改（特殊价直接改数字）；「8折」勾选框只出现在官网按摩项上，含门票时自动勾上。</div>
 
-      <div class="row c2" style="margin-top:16px">
-        <div><label>实付金额 RM</label><input id="paid" type="number" min="0" step="0.01" placeholder="234.82"></div>
+      <div class="totals" id="totals"></div>
+
+      <h2 style="margin-top:18px">③ 付款</h2>
+      <div class="row c2">
+        <div><label>实付金额 RM *</label><input id="paid" type="number" min="0" step="0.01" placeholder="对照右边应付总额"></div>
         <div><label>付款方式</label>
           <select id="method">
             <option>DuitNow QR</option><option>TNG eWallet</option>
@@ -84,95 +102,263 @@
         </div>
       </div>
       <div class="row c2">
-        <div><label>付款参考号</label><input id="ref" placeholder="截图上的 Reference No."></div>
-        <div><label>付款时间</label><input id="ptime" placeholder="07月02日 15:17"></div>
+        <div><label>付款参考号 *（长按截图复制，别手打）</label><input id="ref" placeholder="截图上的 Reference No."></div>
+        <div><label>付款时间</label><input id="ptime" placeholder="07月04日 15:17"></div>
       </div>
       <div class="row"><div><label>经手客服（选填）</label><input id="staff" placeholder="Darrell"></div></div>
-
-      <div id="check" class="checkbar ok">金额待填写</div>
+      <div id="refnote" class="notice"></div>
+      <div id="check" class="checkbar ok">待填写</div>
     </div>
 
     <div class="card">
       <h2>散客群通知预览</h2>
-      <div class="preview"><div class="bubble" id="preview">填写左边资料，这里会自动生成…</div></div>
+      <div class="preview"><div class="bubble" id="preview">左边选好项目，这里自动生成…</div></div>
       <button class="copybtn" id="copy" onclick="copyText()">复制通知</button>
-      <p class="tip">复制后到 WhatsApp 散客群粘贴发送。星号 *…* 在 WhatsApp 里会显示为粗体。</p>
+      <p class="tip">复制后到 WhatsApp 散客群粘贴发送。*…* 在 WhatsApp 里显示为粗体。</p>
     </div>
   </div>
 </div>
 
 <script>
+// 价格单位：分（cent）。净价，前台展示与计算自动 +10% SC +8% SST（各按净价，不复合）。
+// 来源：官网 Store API 实抓 + 门店价目牌，2026-07-04 定稿。KTV/治疗类/美容不收录。
+const CATALOG = [
+ {group:"🎫 门票 · 12小时（周日至周四=平日）", items:[
+  {id:"solo-wd", n:"单人票 Solo · 周日至周四", p:16900, k:"ticket", wd:1},
+  {id:"solo-we", n:"单人票 Solo · 周五六/公假", p:19900, k:"ticket", we:1},
+  {id:"twin-wd", n:"双人买一送一 Twin · 周日至周四", p:16900, k:"ticket", wd:1},
+  {id:"twin-we", n:"双人买一送一 Twin · 周五六/公假", p:19900, k:"ticket", we:1},
+  {id:"kids-wd", n:"儿童票 Kids · 周日至周四", p:5800, k:"ticket", wd:1},
+  {id:"kids-we", n:"儿童票 Kids · 周五六/公假", p:8800, k:"ticket", we:1},
+  {id:"worldcup", n:"世界杯观赛夜 12小时票", p:21800, k:"ticket"},
+ ]},
+ {group:"🧖 套餐 / 活动", items:[
+  {id:"daytime", n:"日间按摩套餐 Daytime（9am-5pm）", p:19900, k:"pkg"},
+  {id:"scrub-wd", n:"扬州搓澡套餐(含门票) · 周日至周四", p:19900, k:"pkg", wd:1},
+  {id:"scrub-we", n:"扬州搓澡套餐(含门票) · 周五六/公假", p:23900, k:"pkg", we:1},
+  {id:"lunch1", n:"商务午餐 · 单次（工作日11am-2pm）", p:2990, k:"pkg"},
+  {id:"lunch10", n:"商务午餐 · 十次卡", p:24900, k:"pkg"},
+ ]},
+ {group:"💆 按摩理疗 · 官网（含门票自动8折）", items:[
+  {id:"local", n:"局部理疗 30min", p:19900, k:"massage"},
+  {id:"tuina", n:"中式推拿 60min", p:29900, k:"massage"},
+  {id:"thai", n:"泰式按摩 80min", p:39900, k:"massage"},
+  {id:"foot", n:"经典足疗 60min", p:29900, k:"massage"},
+  {id:"footpkg", n:"足疗套餐 100min", p:49900, k:"massage"},
+  {id:"soothe", n:"舒缓按摩 60min", p:36900, k:"massage"},
+  {id:"stone", n:"热石排毒 80min（免门票）", p:49900, k:"massage"},
+  {id:"french", n:"法式护理 100min（免门票）", p:69900, k:"massage"},
+  {id:"fiveel", n:"五行至尊SPA 110min（免门票）", p:79900, k:"massage"},
+  {id:"ear", n:"采耳SPA 30min", p:15000, k:"massage"},
+  {id:"earbath", n:"唐式耳浴 60min", p:29900, k:"massage"},
+  {id:"pedicure", n:"扬州修脚 30min", p:15000, k:"massage"},
+  {id:"cupping", n:"穴位拔罐 30min", p:15000, k:"massage"},
+  {id:"guasha", n:"经络刮痧 30min", p:15000, k:"massage"},
+  {id:"scrub1", n:"扬州搓澡单项 30min（不含门票）", p:15000, k:"massage"},
+ ]},
+ {group:"🐉 门店项目（不参与8折）", items:[
+  {id:"dragon", n:"抓龙筋（泰颐龙韵）90min", p:69900, k:"offline"},
+  {id:"phoenix", n:"抓凤筋（凤还巢）90min", p:69900, k:"offline"},
+  {id:"4hands", n:"和鸣·四手经典 70min", p:99900, k:"offline"},
+  {id:"backstep", n:"花式踩背 30min", p:19900, k:"offline"},
+  {id:"eyewash", n:"清瞳目（洗眼）", p:15000, k:"offline"},
+ ]},
+ {group:"🚪 包房（不参与8折）", items:[
+  {id:"storm1", n:"暴风雨房 · 1小时", p:49900, k:"room"},
+  {id:"storm4", n:"暴风雨房 · 4小时（订3送1）", p:69900, k:"room"},
+  {id:"golf1", n:"高尔夫房 · 1小时", p:49900, k:"room"},
+  {id:"golf4", n:"高尔夫房 · 4小时（订3送1）", p:69900, k:"room"},
+ ]},
+];
+const BYID = {};
+CATALOG.forEach(g=>g.items.forEach(i=>BYID[i.id]=i));
+
+let rows = [];   // {uid, id|null, name, kind, qty, priceCent, disc(bool), autoDisc(bool)}
+let uidSeq = 1;
+
 function el(id){return document.getElementById(id)}
-function addPkg(name,qty,amt){
-  const box=el('pkgs');const div=document.createElement('div');div.className='pkg';
-  div.innerHTML='<input placeholder="套餐名，例 搓澡+门票" class="pn">'+
-    '<input type="number" min="1" value="'+(qty||1)+'" class="pq" title="数量">'+
-    '<input type="number" min="0" step="0.01" placeholder="金额" class="pa" title="金额RM">'+
-    '<button class="del" title="删除">×</button>';
-  if(name)div.querySelector('.pn').value=name;
-  if(amt!=null)div.querySelector('.pa').value=amt;
-  div.querySelector('.del').onclick=()=>{div.remove();render()};
-  div.querySelectorAll('input').forEach(i=>i.addEventListener('input',render));
-  box.appendChild(div);render();
+function money(c){return 'RM'+(c/100).toFixed(2)}
+
+function initPick(){
+  const s = el('pick');
+  let html = '';
+  CATALOG.forEach(g=>{
+    html += `<optgroup label="${g.group}">`;
+    g.items.forEach(i=>{ html += `<option value="${i.id}">${i.n} — ${money(i.p)}</option>`; });
+    html += '</optgroup>';
+  });
+  html += '<optgroup label="✏️ 其他"><option value="__custom">自定义项目（手填名称金额）</option></optgroup>';
+  s.innerHTML = html;
 }
-function pkgs(){
-  return [...document.querySelectorAll('.pkg')].map(p=>({
-    name:p.querySelector('.pn').value.trim(),
-    qty:parseInt(p.querySelector('.pq').value)||0,
-    amt:parseFloat(p.querySelector('.pa').value)||0
-  })).filter(p=>p.name||p.amt);
+
+function addPicked(){
+  const v = el('pick').value;
+  if(v === '__custom'){
+    rows.push({uid:uidSeq++, id:null, name:'', kind:'custom', qty:1, priceCent:0, disc:false, autoDisc:false});
+  }else{
+    const it = BYID[v];
+    rows.push({uid:uidSeq++, id:it.id, name:it.n, kind:it.k, qty:1, priceCent:it.p, disc:false, autoDisc:false});
+  }
+  applyAutoDiscount();
+  renderRows(); render();
 }
-function money(n){return 'RM'+(Math.round(n*100)/100).toFixed(2)}
+
+function hasTicket(){ return rows.some(r=>r.kind==='ticket'); }
+
+function applyAutoDiscount(){
+  const t = hasTicket();
+  rows.forEach(r=>{
+    if(r.kind==='massage'){
+      if(t && !r._userTouchedDisc){ r.disc = true; r.autoDisc = true; }
+      if(!t){ r.disc = false; r.autoDisc = false; r._userTouchedDisc = false; }
+    }
+  });
+}
+
+function rowAmount(r){
+  const unit = r.disc ? Math.round(r.priceCent*0.8) : r.priceCent;
+  return unit * (r.qty||0);
+}
+
+function renderRows(){
+  const box = el('items');
+  box.innerHTML = '';
+  rows.forEach(r=>{
+    const d = document.createElement('div');
+    d.className = 'item';
+    const isCustom = r.kind==='custom';
+    let inner = '';
+    if(isCustom){
+      inner = `<div class="nm"><input placeholder="自定义项目名" value="${r.name.replace(/"/g,'&quot;')}" style="height:28px;font-size:13px" oninput="rows.find(x=>x.uid===${r.uid}).name=this.value;render()"><div class="d"><span style="color:var(--warn)">自定义</span></div></div>`;
+    }else{
+      let discCtl = '';
+      if(r.kind==='massage'){
+        discCtl = `<label><input type="checkbox" ${r.disc?'checked':''} onchange="toggleDisc(${r.uid},this.checked)">8折</label>`;
+        if(r.disc) discCtl += `<span>折后 ${money(Math.round(r.priceCent*0.8))}</span>`;
+      }
+      inner = `<div class="nm"><span class="t">${r.name}</span><div class="d"><span>${money(r.priceCent)}</span>${discCtl}</div></div>`;
+    }
+    d.innerHTML = inner +
+      `<input class="qty" type="number" min="1" value="${r.qty}" title="数量" oninput="rows.find(x=>x.uid===${r.uid}).qty=parseInt(this.value)||1;render()">` +
+      `<input class="prc" type="number" min="0" step="0.01" value="${(r.priceCent/100).toFixed(2)}" title="单价RM(可改)" oninput="rows.find(x=>x.uid===${r.uid}).priceCent=Math.round((parseFloat(this.value)||0)*100);render()">` +
+      `<button class="del" onclick="delRow(${r.uid})">×</button>`;
+    box.appendChild(d);
+  });
+}
+
+function toggleDisc(uid, on){
+  const r = rows.find(x=>x.uid===uid);
+  r.disc = on; r._userTouchedDisc = true; r.autoDisc = false;
+  render();
+}
+function delRow(uid){
+  rows = rows.filter(r=>r.uid!==uid);
+  applyAutoDiscount(); renderRows(); render();
+}
+
+function calc(){
+  const sub = rows.reduce((a,r)=>a+rowAmount(r),0);
+  const sc = Math.round(sub*0.10);
+  const sst = Math.round(sub*0.08);
+  return {sub, sc, sst, total: sub+sc+sst};
+}
+
 function fmtDate(){
-  const d=el('date').value,t=el('time').value;if(!d)return'';
-  const[y,m,day]=d.split('-');let s=y+'年'+m+'月'+day+'日';if(t)s+=' '+t;return s;
+  const d=el('date').value, t=el('time').value;
+  if(!d) return '';
+  const [y,m,day]=d.split('-');
+  let s=y+'年'+m+'月'+day+'日'; if(t) s+=' '+t; return s;
 }
 function paxStr(){
-  const m=+el('male').value||0,f=+el('female').value||0,c=+el('child').value||0;
-  const tot=m+f+c;if(!tot)return'';
-  let parts=[];if(m)parts.push('男'+m);if(f)parts.push('女'+f);if(c)parts.push('小孩'+c);
-  return tot+'人（'+parts.join(' ')+'）';
+  const m=+el('male').value||0,f=+el('female').value||0,c=+el('child').value||0,tot=m+f+c;
+  if(!tot) return '';
+  let a=[]; if(m)a.push('男'+m); if(f)a.push('女'+f); if(c)a.push('小孩'+c);
+  return tot+'人（'+a.join(' ')+'）';
 }
+
+function dayHint(){
+  const n = el('daynote'); n.style.display='none';
+  const dv = el('date').value; if(!dv || !rows.length) return;
+  const day = new Date(dv+'T00:00:00').getDay(); // 5=Fri 6=Sat
+  const isWe = (day===5||day===6);
+  const wrong = rows.filter(r=>{
+    const it = r.id && BYID[r.id]; if(!it) return false;
+    return (isWe && it.wd) || (!isWe && it.we);
+  });
+  if(wrong.length){
+    n.style.display='block';
+    n.textContent = isWe
+      ? '⚠ 到店日期是周五/六，但选了平日票价项目，请确认（公共假期也按周末价）。'
+      : '⚠ 到店日期是周日至周四，但选了周末票价项目，请确认（若当天是公共假期则周末价正确）。';
+  }
+}
+
+function refHint(){
+  const n = el('refnote'); n.style.display='none';
+  const v = el('ref').value.trim(); if(!v) return;
+  const ok = /^[A-Z0-9][A-Z0-9\-\/]{7,79}$/i.test(v) && !/\s/.test(v);
+  if(!ok){ n.style.display='block'; n.textContent='⚠ 参考号格式可疑（应为8位以上字母数字、无空格）。请长按付款截图复制，不要手打。'; }
+}
+
 function render(){
-  const ps=pkgs();
-  const sum=ps.reduce((a,p)=>a+p.amt,0);
-  const paid=parseFloat(el('paid').value)||0;
-  // amount check
-  const chk=el('check');
-  if(!paid&&!sum){chk.className='checkbar ok';chk.textContent='金额待填写';}
-  else if(Math.abs(sum-paid)<=0.01){chk.className='checkbar ok';chk.textContent='✓ 套餐合计 '+money(sum)+' = 实付 '+money(paid);}
-  else{chk.className='checkbar warn';chk.textContent='⚠ 套餐合计 '+money(sum)+' 与实付 '+money(paid)+' 不一致，请核对';}
-  // build message
+  applyAutoDiscount();
+  const {sub, sc, sst, total} = calc();
+  el('totals').innerHTML =
+    `<div class="tr"><span>小计（净价）</span><span>${money(sub)}</span></div>`+
+    `<div class="tr"><span>服务费 10%</span><span>${money(sc)}</span></div>`+
+    `<div class="tr"><span>SST 8%</span><span>${money(sst)}</span></div>`+
+    `<div class="tr grand"><span>应付总额</span><span>${money(total)}</span></div>`;
+
+  const paid = Math.round((parseFloat(el('paid').value)||0)*100);
+  const chk = el('check');
+  if(!rows.length && !paid){ chk.className='checkbar ok'; chk.textContent='待填写'; }
+  else if(!paid){ chk.className='checkbar warn'; chk.textContent='应付 '+money(total)+'，等待填入实付金额核对'; }
+  else if(Math.abs(paid-total)<=1){ chk.className='checkbar ok'; chk.textContent='✓ 实付 '+money(paid)+' = 应付 '+money(total); }
+  else{ chk.className='checkbar warn'; chk.textContent='⚠ 实付 '+money(paid)+' 与应付 '+money(total)+' 不一致，请核对（改价/折扣请直接改单价）'; }
+
+  dayHint(); refHint();
+
   const L=[];
   L.push('🧖 *壹号汤泉 · 客户到店预约*');
   L.push('━━━━━━━━━━━━━');
   L.push('👤 客户：'+(el('name').value.trim()||'—'));
   L.push('📱 电话：'+(el('phone').value.trim()||'—'));
-  const dt=fmtDate();L.push('📅 到店：'+(dt||'—'));
-  const px=paxStr();if(px)L.push('👥 人数：'+px);
+  L.push('📅 到店：'+(fmtDate()||'—'));
+  const px=paxStr(); if(px) L.push('👥 人数：'+px);
   L.push('');
-  L.push('🎫 套餐：');
-  if(ps.length)ps.forEach(p=>L.push('   • '+(p.name||'—')+' ×'+(p.qty||1)+' — '+money(p.amt)));
-  else L.push('   • —');
+  L.push('🎫 项目：');
+  if(rows.length){
+    rows.forEach(r=>{
+      const nm = r.name || '—';
+      let line = '   • '+nm+' ×'+(r.qty||1)+' — '+money(rowAmount(r));
+      if(r.disc) line += '（原'+money(r.priceCent*(r.qty||1))+' 8折）';
+      L.push(line);
+    });
+  } else L.push('   • —');
   L.push('');
+  L.push('小计：'+money(sub));
+  L.push('服务费10%：'+money(sc)+'　SST8%：'+money(sst));
+  L.push('应付总额：*'+money(total)+'*');
   L.push('💰 实付：'+money(paid));
   L.push('💳 付款方式：'+el('method').value);
-  if(el('ref').value.trim())L.push('🔖 参考号：'+el('ref').value.trim());
-  if(el('ptime').value.trim())L.push('🕐 付款时间：'+el('ptime').value.trim());
+  if(el('ref').value.trim()) L.push('🔖 参考号：'+el('ref').value.trim());
+  if(el('ptime').value.trim()) L.push('🕐 付款时间：'+el('ptime').value.trim());
   L.push('━━━━━━━━━━━━━');
   L.push('📌 前台请按预约时间安排到店 🙏');
-  if(el('staff').value.trim())L.push('（录单：'+el('staff').value.trim()+'）');
-  el('preview').textContent=L.join('\n');
+  if(el('staff').value.trim()) L.push('（录单：'+el('staff').value.trim()+'）');
+  el('preview').textContent = L.join('\n');
 }
+
 function copyText(){
-  const t=el('preview').textContent;
-  navigator.clipboard.writeText(t).then(()=>{
-    const b=el('copy');b.textContent='✓ 已复制';b.classList.add('done');
-    setTimeout(()=>{b.textContent='复制通知';b.classList.remove('done')},1600);
+  navigator.clipboard.writeText(el('preview').textContent).then(()=>{
+    const b=el('copy'); b.textContent='✓ 已复制'; b.classList.add('done');
+    setTimeout(()=>{b.textContent='复制通知'; b.classList.remove('done')},1600);
   });
 }
-document.querySelectorAll('input,select').forEach(i=>i.addEventListener('input',render));
-addPkg('',1,'');
+
+initPick();
+['name','phone','date','time','male','female','child','paid','method','ref','ptime','staff']
+  .forEach(id=>el(id).addEventListener('input',render));
 render();
 </script>
 </body>
