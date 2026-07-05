@@ -123,7 +123,7 @@
 
 <script>
 // 价格单位：分（cent）。净价，前台展示与计算自动 +10% SC +8% SST（各按净价，不复合）。
-// 来源：官网 Store API 实抓 + 门店价目牌，2026-07-04 定稿。KTV/治疗类/美容不收录。
+// 来源：官方价目表事实源 OneSpa官方价目表-权威事实-2026-07-05（门店菜单为准）。房费(KTV/暴风雨/高尔夫)不收录。
 const CATALOG = [
  {group:"🎫 门票 · 12小时（周日至周四=平日）", items:[
   {id:"solo-wd", n:"单人票 Solo · 周日至周四", p:16900, k:"ticket", wd:1},
@@ -141,22 +141,22 @@ const CATALOG = [
   {id:"lunch1", n:"商务午餐 · 单次（工作日11am-2pm）", p:2990, k:"pkg"},
   {id:"lunch10", n:"商务午餐 · 十次卡", p:24900, k:"pkg"},
  ]},
- {group:"💆 按摩理疗 · 官网（含门票自动8折）", items:[
+ {group:"💆 按摩理疗 · 15项（车含B1F1或单人票→自动8折）", items:[
   {id:"local", n:"局部理疗 30min", p:19900, k:"massage"},
   {id:"tuina", n:"中式推拿 60min", p:29900, k:"massage"},
-  {id:"thai", n:"泰式按摩 80min", p:39900, k:"massage"},
+  {id:"thai", n:"古法泰式 70min", p:39900, k:"massage"},
   {id:"foot", n:"经典足疗 60min", p:29900, k:"massage"},
-  {id:"footpkg", n:"足疗套餐 100min", p:49900, k:"massage"},
-  {id:"soothe", n:"舒缓按摩 60min", p:36900, k:"massage"},
-  {id:"stone", n:"热石排毒 80min（免门票）", p:49900, k:"massage"},
-  {id:"french", n:"法式护理 100min（免门票）", p:69900, k:"massage"},
-  {id:"fiveel", n:"五行至尊SPA 110min（免门票）", p:79900, k:"massage"},
-  {id:"ear", n:"采耳SPA 30min", p:15000, k:"massage"},
-  {id:"earbath", n:"唐式耳浴 60min", p:29900, k:"massage"},
-  {id:"pedicure", n:"扬州修脚 30min", p:15000, k:"massage"},
-  {id:"cupping", n:"穴位拔罐 30min", p:15000, k:"massage"},
-  {id:"guasha", n:"经络刮痧 30min", p:15000, k:"massage"},
-  {id:"scrub1", n:"扬州搓澡单项 30min（不含门票）", p:15000, k:"massage"},
+  {id:"footpkg", n:"套餐足疗 80min", p:49900, k:"massage"},
+  {id:"soothe", n:"玉手舒缓 60min", p:36900, k:"massage"},
+  {id:"stone", n:"肾能热石 80min", p:49900, k:"massage"},
+  {id:"french", n:"法式尊享 100min", p:69900, k:"massage"},
+  {id:"fiveel", n:"五行至尊 110min", p:79900, k:"massage"},
+  {id:"ear", n:"妙音舒耳", p:15000, k:"massage"},
+  {id:"earbath", n:"大唐耳浴 60min", p:29900, k:"massage"},
+  {id:"pedicure", n:"扬州修脚", p:15000, k:"massage"},
+  {id:"cupping", n:"穴位拔罐", p:15000, k:"massage"},
+  {id:"guasha", n:"经络刮痧", p:15000, k:"massage"},
+  {id:"scrub1", n:"扬州搓澡", p:15000, k:"massage"},
  ]},
  {group:"🐉 门店项目（不参与8折）", items:[
   {id:"dragon", n:"抓龙筋（泰颐龙韵）90min", p:69900, k:"offline"},
@@ -164,12 +164,6 @@ const CATALOG = [
   {id:"4hands", n:"和鸣·四手经典 70min", p:99900, k:"offline"},
   {id:"backstep", n:"花式踩背 30min", p:19900, k:"offline"},
   {id:"eyewash", n:"清瞳目（洗眼）", p:15000, k:"offline"},
- ]},
- {group:"🚪 包房（不参与8折）", items:[
-  {id:"storm1", n:"暴风雨房 · 1小时", p:49900, k:"room"},
-  {id:"storm4", n:"暴风雨房 · 4小时（订3送1）", p:69900, k:"room"},
-  {id:"golf1", n:"高尔夫房 · 1小时", p:49900, k:"room"},
-  {id:"golf4", n:"高尔夫房 · 4小时（订3送1）", p:69900, k:"room"},
  ]},
 ];
 const BYID = {};
@@ -205,7 +199,7 @@ function addPicked(){
   renderRows(); render();
 }
 
-function hasTicket(){ return rows.some(r=>r.kind==='ticket'); }
+function hasTicket(){ return rows.some(r=>r.kind==='ticket' && r.id!=='kids-wd' && r.id!=='kids-we' && r.id!=='worldcup'); }
 
 function applyAutoDiscount(){
   const t = hasTicket();
