@@ -209,17 +209,47 @@ function addPicked(){
 
 function hasTicket(){ return rows.some(r=>r.kind==='ticket' && r.id!=='kids-wd' && r.id!=='kids-we' && r.id!=='worldcup'); }
 
+// ===== 1b 口径（✅板 7/6）：免票与8折互斥，工具自动比价取优 =====
+// Plan A 加购8折：车含 B1F1/Solo（儿童/世界杯除外）→ 单项净价<499 的按摩/理疗 8 折；≥499 单项永不打折。
+// Plan B 满499免票：按摩合计（原价）≥499 且车内有 Solo 票 → 免 1 张 Solo（最贵那张），全单按摩原价。
+// 两案自动取省得多的；Twin 票不可拆免（买一送一无"1位"可免），无 Solo 时 Plan B 不可用。
+const DISC_CAP = 49900; // 单项≥499 不参与8折
+
 function applyAutoDiscount(){
   const t = hasTicket();
-  rows.forEach(r=>{
-    if(r.kind==='massage'){
-      if(t && !r._userTouchedDisc){ r.disc = true; r.autoDisc = true; }
-      if(!t){ r.disc = false; r.autoDisc = false; r._userTouchedDisc = false; }
-    }
-  });
+  rows.forEach(r=>{ r._freeTicket = false; });
+  const mass = rows.filter(r=>r.kind==='massage');
+  const sumOrig = mass.reduce((a,r)=>a+r.priceCent*(r.qty||1),0);
+
+  // Plan A 省额
+  let saveA = 0;
+  if(t) mass.forEach(r=>{ if(r.priceCent < DISC_CAP) saveA += Math.round(r.priceCent*0.2)*(r.qty||1); });
+  // Plan B 省额（免最贵一张 Solo）
+  const solos = rows.filter(r=>r.kind==='ticket' && (r.id==='solo-wd'||r.id==='solo-we'));
+  let saveB = 0, freeRow = null;
+  if(sumOrig >= 49900 && solos.length){
+    freeRow = solos.slice().sort((a,b)=>b.priceCent-a.priceCent)[0];
+    saveB = freeRow.priceCent;
+  }
+
+  if(saveB > 0 && saveB >= saveA){
+    window._deal = {plan:'B', save:saveB, alt:saveA};
+    rows.forEach(r=>{ if(r.kind==='massage'){ r.disc=false; r.autoDisc=false; r._userTouchedDisc=false; } });
+    freeRow._freeTicket = true;
+  }else if(saveA > 0){
+    window._deal = {plan:'A', save:saveA, alt:saveB};
+    mass.forEach(r=>{
+      if(r.priceCent >= DISC_CAP){ r.disc=false; r.autoDisc=false; }
+      else if(!r._userTouchedDisc){ r.disc=true; r.autoDisc=true; }
+    });
+  }else{
+    window._deal = {plan:null, save:0, alt:0};
+    mass.forEach(r=>{ if(!t){ r.disc=false; r.autoDisc=false; r._userTouchedDisc=false; } });
+  }
 }
 
 function rowAmount(r){
+  if(r._freeTicket) return 0;
   const unit = r.disc ? Math.round(r.priceCent*0.8) : r.priceCent;
   return unit * (r.qty||0);
 }
@@ -237,9 +267,14 @@ function renderRows(){
     }else{
       let discCtl = '';
       if(r.kind==='massage'){
-        discCtl = `<label><input type="checkbox" ${r.disc?'checked':''} onchange="toggleDisc(${r.uid},this.checked)">8折</label>`;
-        if(r.disc) discCtl += `<span>折后 ${money(Math.round(r.priceCent*0.8))}</span>`;
+        if(r.priceCent >= DISC_CAP){
+          discCtl = `<span style="color:var(--muted)">满499档·不打折·享免票</span>`;
+        }else{
+          discCtl = `<label><input type="checkbox" ${r.disc?'checked':''} onchange="toggleDisc(${r.uid},this.checked)">8折</label>`;
+          if(r.disc) discCtl += `<span>折后 ${money(Math.round(r.priceCent*0.8))}</span>`;
+        }
       }
+      if(r._freeTicket) discCtl += `<span style="color:var(--accent);font-weight:600">🎁 满499免票 −${money(r.priceCent)}</span>`;
       inner = `<div class="nm"><span class="t">${r.name}</span><div class="d"><span>${money(r.priceCent)}</span>${discCtl}</div></div>`;
     }
     d.innerHTML = inner +
@@ -307,8 +342,15 @@ function refHint(){
 function render(){
   applyAutoDiscount();
   const {sub, sc, sst, total} = calc();
+  let dealLine = '';
+  const D = window._deal || {plan:null};
+  if(D.plan==='B') dealLine = `<div class="tr" style="color:var(--accent);font-weight:600"><span>🎁 已自动取优：满499免1门票</span><span>−${money(D.save)}</span></div>`+
+    (D.alt>0?`<div class="tr" style="font-size:11.5px"><span>（另一方案 加购8折 仅省 ${money(D.alt)}，未采用）</span><span></span></div>`:'');
+  if(D.plan==='A') dealLine = `<div class="tr" style="color:var(--accent);font-weight:600"><span>🏷️ 已自动取优：加购8折</span><span>−${money(D.save)}</span></div>`+
+    (D.alt>0?`<div class="tr" style="font-size:11.5px"><span>（另一方案 满499免票 仅省 ${money(D.alt)}，未采用）</span><span></span></div>`:'');
   el('totals').innerHTML =
-    `<div class="tr"><span>小计（净价）</span><span>${money(sub)}</span></div>`+
+    dealLine+
+    `<div class="tr"><span>小计（净价·已含优惠）</span><span>${money(sub)}</span></div>`+
     `<div class="tr"><span>服务费 10%</span><span>${money(sc)}</span></div>`+
     `<div class="tr"><span>SST 8%</span><span>${money(sst)}</span></div>`+
     `<div class="tr grand"><span>应付总额</span><span>${money(total)}</span></div>`;
@@ -337,6 +379,7 @@ function render(){
     its.forEach(r=>{
       let line='- '+(r.name||'—')+' ×'+(r.qty||1)+' — '+money(rowAmount(r));
       if(r.disc) line+='（原'+money(r.priceCent*(r.qty||1))+' 8折）';
+      if(r._freeTicket) line+='（满499免门票）';
       L.push(line);
     });
   }else{ L.push('商品：—'); }
@@ -382,7 +425,7 @@ function buildSubmit(){
   rows.forEach(r=>{
     const nm=(r.name||'').trim(); if(!nm && r.kind!=='custom') return;
     L.push('套餐'+i);
-    L.push('套餐名：'+nm+(r.disc?'（8折）':''));
+    L.push('套餐名：'+nm+(r.disc?'（8折）':'')+(r._freeTicket?'（满499免门票）':''));
     L.push('数量：'+(r.qty||1));
     L.push('金额：RM'+(rowAmount(r)/100).toFixed(2));
     L.push('');
