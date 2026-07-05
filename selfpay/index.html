@@ -123,7 +123,8 @@
 
 <script>
 // 价格单位：分（cent）。净价，前台展示与计算自动 +10% SC +8% SST（各按净价，不复合）。
-// 来源：官方价目表事实源 OneSpa官方价目表-权威事实-2026-07-05（门店菜单为准）。房费(KTV/暴风雨/高尔夫)不收录。
+// 来源：官方价目表事实源 OneSpa官方价目表-权威事实-2026-07-05 + 事实库v2 §5（8折终局：门店经典参与，仅包房除外，✅板7/4晚+7/6确认）。
+// 包房实价：暴风雨499/1h·699/4h订3送1；高尔夫99/1h·139/2h·199/3h按房收费(respond.io 7/3铁证)。KTV不收录(待拍板)。
 const CATALOG = [
  {group:"🎫 门票 · 12小时（周日至周四=平日）", items:[
   {id:"solo-wd", n:"单人票 Solo · 周日至周四", p:16900, k:"ticket", wd:1},
@@ -158,12 +159,19 @@ const CATALOG = [
   {id:"guasha", n:"经络刮痧", p:15000, k:"massage"},
   {id:"scrub1", n:"扬州搓澡", p:15000, k:"massage"},
  ]},
- {group:"🐉 门店项目（不参与8折）", items:[
-  {id:"dragon", n:"抓龙筋（泰颐龙韵）90min", p:69900, k:"offline"},
-  {id:"phoenix", n:"抓凤筋（凤还巢）90min", p:69900, k:"offline"},
-  {id:"4hands", n:"和鸣·四手经典 70min", p:99900, k:"offline"},
-  {id:"backstep", n:"花式踩背 30min", p:19900, k:"offline"},
-  {id:"eyewash", n:"清瞳目（洗眼）", p:15000, k:"offline"},
+ {group:"🐉 门店经典（B1F1/单人票同车→自动8折）", items:[
+  {id:"dragon", n:"抓龙筋（泰颐龙韵）90min", p:69900, k:"massage"},
+  {id:"phoenix", n:"抓凤筋（凤还巢）90min", p:69900, k:"massage"},
+  {id:"4hands", n:"和鸣·四手经典 70min", p:99900, k:"massage"},
+  {id:"backstep", n:"花式踩背 30min", p:19900, k:"massage"},
+  {id:"eyewash", n:"清瞳目（洗眼）", p:15000, k:"massage"},
+ ]},
+ {group:"🚪 包房（按房收费·不参与8折）", items:[
+  {id:"storm1", n:"暴风雨房 · 1小时", p:49900, k:"room"},
+  {id:"storm4", n:"暴风雨房 · 4小时（订3送1）", p:69900, k:"room"},
+  {id:"golf1", n:"高尔夫房 · 1小时", p:9900, k:"room"},
+  {id:"golf2", n:"高尔夫房 · 2小时", p:13900, k:"room"},
+  {id:"golf3", n:"高尔夫房 · 3小时", p:19900, k:"room"},
  ]},
 ];
 const BYID = {};
