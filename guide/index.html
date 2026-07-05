@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>小ONE · Self Pay 客服操作指南</title>
+<style>
+  :root{
+    --bg:#efe6d8; --card:#fffdf9; --ink:#3a2e26; --sub:#8a7a6a; --line:#e5dccc;
+    --accent:#b0491d; --accent2:#c86a3a; --gold:#b0894f; --ok:#3f7d54; --okbg:#e7f0e6;
+    --warn:#b0491d; --warnbg:#f7e7dd; --shadow:0 6px 24px rgba(90,60,30,.13);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);overflow:hidden;line-height:1.6}
+  #deck{height:100dvh;display:flex;flex-direction:column}
+  .stage{flex:1;position:relative;overflow:hidden}
+  .slide{position:absolute;inset:0;padding:26px 22px 12px;display:none;flex-direction:column;
+    overflow-y:auto;animation:fade .35s ease}
+  .slide.on{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .kicker{font-size:12px;letter-spacing:2px;color:var(--gold);font-weight:600;text-transform:uppercase}
+  .badge{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;
+    background:var(--accent);color:#fff;font-weight:700;font-size:15px;margin-bottom:12px}
+  h1{font-size:26px;font-weight:800;line-height:1.25;margin:6px 0 4px}
+  h2{font-size:21px;font-weight:800;line-height:1.28;margin:4px 0 14px}
+  .lead{font-size:15.5px;color:var(--sub);margin-bottom:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 17px;
+    box-shadow:var(--shadow);margin-bottom:12px}
+  .card.tight{padding:13px 15px}
+  .row{display:flex;gap:12px;align-items:flex-start;margin-bottom:11px}
+  .row:last-child{margin-bottom:0}
+  .ic{flex:none;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+    font-size:19px;background:#f4ecdf}
+  .ic.a{background:#f6e2d6}.ic.g{background:#eee6d4}.ic.k{background:var(--okbg)}
+  .rt{font-size:15px}.rt b{font-weight:700}
+  .rs{font-size:13px;color:var(--sub)}
+  .big{font-size:17px;font-weight:700}
+  .pill{display:inline-block;background:#f6e2d6;color:var(--accent);font-size:12.5px;font-weight:700;
+    padding:3px 11px;border-radius:20px;margin:0 4px 5px 0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .lane{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+  .lane .h{font-weight:800;font-size:15.5px;margin-bottom:6px;display:flex;align-items:center;gap:7px}
+  .lane .d{font-size:13.5px;color:var(--sub);line-height:1.5}
+  .lane.me{border:2px solid var(--accent);background:#fff8f2}
+  .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+  .tag.you{background:var(--accent);color:#fff}.tag.auto{background:var(--okbg);color:var(--ok)}
+  .step{display:flex;gap:13px;align-items:center;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:14px;margin-bottom:11px;box-shadow:var(--shadow)}
+  .step .n{flex:none;width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;
+    font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}
+  .step .t{font-size:15px}.step .t b{font-weight:800;font-size:16px}
+  .quote{background:#f6e2d6;border-left:4px solid var(--accent);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-size:15px;font-weight:600;color:var(--accent);margin:4px 0}
+  .redline{background:var(--warnbg);border:1px solid #e8c3ad;border-radius:12px;padding:12px 14px;
+    font-size:14px;font-weight:600;color:var(--warn);margin-bottom:9px;display:flex;gap:9px}
+  .ex{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:10px;box-shadow:var(--shadow)}
+  .ex .q{font-size:14.5px;color:var(--sub)}
+  .ex .a{font-size:17px;font-weight:800;color:var(--accent);margin-top:3px}
+  .ex .a .s{font-size:13px;font-weight:600;color:var(--ok)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12px;color:var(--sub);font-weight:700}
+  td:first-child{font-weight:700;white-space:nowrap}
+  .price td:last-child{text-align:right;font-weight:800;white-space:nowrap;color:var(--accent)}
+  .note{font-size:12.5px;color:var(--sub);margin-top:8px}
+  .qr{width:150px;height:150px;display:block;margin:10px auto;border:6px solid #fff;border-radius:14px;box-shadow:var(--shadow)}
+  .url{text-align:center;font-size:14px;font-weight:700;color:var(--accent);word-break:break-all}
+  .cover{justify-content:center;align-items:center;text-align:center;background:
+    radial-gradient(120% 90% at 50% 0%, #f7efe1 0%, var(--bg) 70%)}
+  .cover .logo{font-size:13px;letter-spacing:4px;color:var(--gold);font-weight:700;margin-bottom:18px}
+  .cover h1{font-size:32px;margin-bottom:10px}
+  .cover .sb{font-size:17px;color:var(--sub);font-weight:600}
+  .cover .hint{position:absolute;bottom:26px;left:0;right:0;text-align:center;font-size:13px;color:var(--sub)}
+  /* nav */
+  .nav{flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;
+    background:var(--card);border-top:1px solid var(--line)}
+  .btn{border:none;background:var(--accent);color:#fff;font-size:15px;font-weight:700;padding:10px 20px;
+    border-radius:11px;cursor:pointer;min-width:78px}
+  .btn:disabled{background:#d8ccbb;color:#fff}
+  .btn.ghost{background:#f1e8da;color:var(--accent)}
+  .dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:60%}
+  .dot{width:8px;height:8px;border-radius:50%;background:#d6c9b5;cursor:pointer}
+  .dot.on{background:var(--accent);width:22px;border-radius:5px}
+  .cnt{font-size:12px;color:var(--sub);text-align:center;margin-top:3px}
+  @media(min-width:620px){.slide{padding:34px 40px 16px;max-width:640px;margin:0 auto;width:100%}
+    h1{font-size:30px}.cover h1{font-size:38px}}
+</style>
+</head>
+<body>
+<div id="deck">
+  <div class="stage" id="stage">
+
+    <!-- 1 封面 -->
+    <section class="slide cover on">
+      <div class="logo">壹 号 汤 泉 · ONE SPA</div>
+      <h1>小ONE · Self Pay<br>客服操作指南</h1>
+      <div class="sb">官网外付款，三步搞定</div>
+      <div style="margin-top:22px" class="pill">2026-07 版</div>
+      <div class="hint">← → 或点下方按钮翻页 · 手机可左右滑</div>
+    </section>
+
+    <!-- 2 为什么 -->
+    <section class="slide">
+      <span class="badge">1</span>
+      <div class="kicker">先想明白</div>
+      <h2>为什么要用这套？</h2>
+      <div class="card"><div class="row"><div class="ic a">😵</div><div><div class="rt"><b>以前</b>：客户自己扫码/转账付款，客服靠脑子记、靠手打</div><div class="rs">容易漏单、算错钱、对账一团乱</div></div></div></div>
+      <div class="card"><div class="row"><div class="ic k">✅</div><div><div class="rt"><b>现在</b>：一个工具帮你算钱，一个小ONE帮你记账发群</div><div class="rs">你只管录单，算钱和记账交给系统</div></div></div></div>
+      <div class="quote">你不用会算钱、不用记账，照工具和小ONE走就行。</div>
+    </section>
+
+    <!-- 3 两条线 -->
+    <section class="slide">
+      <span class="badge">2</span>
+      <div class="kicker">大局观</div>
+      <h2>订单分两条线</h2>
+      <div class="two">
+        <div class="lane"><div class="h">🛍️ 官网单</div><div class="d">客户在<b>官网</b>下单付款<br>→ 小ONE<b>自动</b>在散客群播报</div><div style="margin-top:9px"><span class="tag auto">系统自动·你不用管</span></div></div>
+        <div class="lane me"><div class="h">🧾 手工单</div><div class="d">客户<b>官网外</b>付款（扫码/转账）<br>→ <b>你用工具</b>处理</div><div style="margin-top:9px"><span class="tag you">这是你的活</span></div></div>
+      </div>
+      <div class="quote" style="margin-top:14px">这份指南只讲右边——手工单（Self Pay）。</div>
+    </section>
+
+    <!-- 4 是什么 -->
+    <section class="slide">
+      <span class="badge">3</span>
+      <div class="kicker">Self Pay</div>
+      <h2>什么时候用它？</h2>
+      <div class="card">客户<b>不通过官网</b>、自己付款的订单，就用这套流程 👇</div>
+      <div>
+        <span class="pill">TNG 扫码</span><span class="pill">DuitNow QR</span><span class="pill">银行转账</span>
+        <span class="pill">支付宝</span><span class="pill">现金</span>
+      </div>
+      <div class="card tight" style="margin-top:14px"><div class="row"><div class="ic">🚫</div><div class="rt">客户在<b>官网</b>下的单 → 小ONE自动处理，<b>不用</b>走这套</div></div></div>
+    </section>
+
+    <!-- 5 三步 -->
+    <section class="slide">
+      <span class="badge">4</span>
+      <div class="kicker">核心流程</div>
+      <h2>就三步</h2>
+      <div class="step"><div class="n">1</div><div class="t"><b>用工具填单</b><br><span class="rs">选项目、填资料，工具自动算钱</span></div></div>
+      <div class="step"><div class="n">2</div><div class="t"><b>客服群提交 + 附凭证</b><br><span class="rs">复制内容发群，同条消息附付款截图</span></div></div>
+      <div class="step"><div class="n">3</div><div class="t"><b>核实到账 → 回「已核实」</b><br><span class="rs">系统自动把订单发到散客群</span></div></div>
+      <div class="quote">背下这三步，其余都是细节。</div>
+    </section>
+
+    <!-- 6 第一步 -->
+    <section class="slide">
+      <span class="badge">5</span>
+      <div class="kicker">第一步</div>
+      <h2>用工具填单</h2>
+      <div class="card tight"><div class="row"><div class="ic g">📱</div><div class="rt">手机/电脑打开工具网址（或扫二维码）</div></div></div>
+      <div class="card tight"><div class="row"><div class="ic g">🎯</div><div class="rt"><b>选项目</b>→自动带价、自动算 10% 服务费 + 8% SST、<b>自动算优惠</b></div></div></div>
+      <div class="card tight"><div class="row"><div class="ic g">📷</div><div class="rt"><b>付款参考号：长按截图复制，别手打</b><div class="rs">手打最容易错</div></div></div></div>
+      <div class="quote">🧮 你不用自己算钱——工具全算好，你照它收。</div>
+    </section>
+
+    <!-- 7 第二步 -->
+    <section class="slide">
+      <span class="badge">6</span>
+      <div class="kicker">第二步</div>
+      <h2>发到客服群</h2>
+      <div class="step"><div class="n">A</div><div class="t">点绿色按钮 <b>「复制提交给小ONE」</b></div></div>
+      <div class="step"><div class="n">B</div><div class="t">到<b>客服群</b>粘贴发送</div></div>
+      <div class="redline">📎 关键：<b>同一条消息</b>附上付款截图 / PDF 回单</div>
+      <div class="card tight"><div class="row"><div class="ic k">💬</div><div class="rt">小ONE 回<b>「收到，核对中」</b>→ 等它出核对卡（约 10 秒）</div></div></div>
+    </section>
+
+    <!-- 8 第三步 -->
+    <section class="slide">
+      <span class="badge">7</span>
+      <div class="kicker">第三步</div>
+      <h2>核实到账 → 确认</h2>
+      <div class="step"><div class="n">A</div><div class="t">小ONE 出<b>核对卡</b>（客户、项目、金额一目了然）</div></div>
+      <div class="step"><div class="n">B</div><div class="t">你<b>人工核实</b>钱确实到账（查银行/钱包）</div></div>
+      <div class="step"><div class="n">C</div><div class="t">群里回 <b>@小ONE 已核实</b> → 系统<b>自动发散客群</b> ✅</div></div>
+      <div class="redline">🔴 钱没核实到账，<b>绝对不要</b>回「已核实」——回了单子就进散客群了</div>
+    </section>
+
+    <!-- 9 价目 -->
+    <section class="slide">
+      <span class="badge">8</span>
+      <div class="kicker">报价 · 上</div>
+      <h2>价目（工具里都有）</h2>
+      <div class="card tight">
+        <table class="price">
+          <tr><th>门票 · 12小时（含餐饮）</th><th></th></tr>
+          <tr><td>平日（周日–四）</td><td>RM169</td></tr>
+          <tr><td>周末/公假（周五六）</td><td>RM199</td></tr>
+        </table>
+      </div>
+      <div class="card tight">
+        <table class="price">
+          <tr><th>常点按摩理疗（举例）</th><th></th></tr>
+          <tr><td>局部理疗 / 妙音舒耳 / 扬州搓澡</td><td>150–199</td></tr>
+          <tr><td>中式推拿 / 经典足疗</td><td>RM299</td></tr>
+          <tr><td>古法泰式 70min</td><td>RM399</td></tr>
+          <tr><td>套餐足疗 / 肾能热石</td><td>RM499</td></tr>
+          <tr><td>法式尊享 / 五行至尊</td><td>699–799</td></tr>
+          <tr><td>抓龙筋 / 抓凤筋 / 四手经典</td><td>699–999</td></tr>
+        </table>
+      </div>
+      <div class="note">💡 价格全在工具下拉菜单里，选中自动带出——不用背。包房（暴风雨/高尔夫/KTV）不参与优惠。</div>
+    </section>
+
+    <!-- 10 优惠 重点 -->
+    <section class="slide">
+      <span class="badge">9</span>
+      <div class="kicker">报价 · 下 · 最重要</div>
+      <h2>优惠：工具自动选最省的</h2>
+      <div class="card tight"><div class="rt">购物车里有<b>门票（单人 Solo / 买一送一 Twin）</b>→ 触发优惠。两种优惠<b>二选一，不叠加</b>：</div></div>
+      <div class="two" style="margin:12px 0">
+        <div class="lane"><div class="h">🏷️ 加购 8 折</div><div class="d"><b>&lt;499</b> 的项目<br>打 8 折</div></div>
+        <div class="lane"><div class="h">🎁 满499免票</div><div class="d"><b>≥499</b> 的项目不打折<br>但<b>免 1 张门票</b></div></div>
+      </div>
+      <div class="ex"><div class="q">单人票 + 抓龙筋 699</div><div class="a">付 RM699 <span class="s">🎁 门票免了（省169）</span></div></div>
+      <div class="ex"><div class="q">单人票 + 中式推拿 299</div><div class="a">付 RM408.20 <span class="s">🏷️ 推拿打8折</span></div></div>
+      <div class="quote">工具会自动挑对客人最划算的，并显示"已省多少"。<b>你照工具结果收钱就对。</b></div>
+    </section>
+
+    <!-- 11 提示对照 + 红线 -->
+    <section class="slide">
+      <span class="badge">10</span>
+      <div class="kicker">速查 · 可截图</div>
+      <h2>小ONE 说什么 = 你做什么</h2>
+      <div class="card tight">
+        <table>
+          <tr><th>小ONE 说</th><th>你做什么</th></tr>
+          <tr><td>收到，核对中</td><td>等核对卡（约10秒）</td></tr>
+          <tr><td>✅ 已核对通过</td><td>核实到账后回「已核实」</td></tr>
+          <tr><td>资料未通过 / 缺XX</td><td>补上，重新提交</td></tr>
+          <tr><td>金额不一致</td><td>检查套餐/实付/截图金额</td></tr>
+          <tr><td>参考号重复</td><td>这凭证用过，查是否重复录</td></tr>
+          <tr><td>没找到付款凭证</td><td>图和文字放<b>同一条</b>重发</td></tr>
+          <tr><td>✅ 已发送散客群</td><td>完成，不用再操作</td></tr>
+        </table>
+      </div>
+      <div class="redline" style="margin-top:12px">🔴 三条红线</div>
+      <div class="card tight" style="font-size:14px">
+        ① 钱没到账，绝不回「已核实」<br>
+        ② 一单一凭证——同一张截图不能用两次<br>
+        ③ 系统故障才用「备用·人工发群」，事后要补录
+      </div>
+    </section>
+
+    <!-- 12 结尾/上手卡 -->
+    <section class="slide cover">
+      <div class="logo">快 速 上 手</div>
+      <h1 style="font-size:24px">记住这一句</h1>
+      <div class="card" style="text-align:left;margin-top:6px">
+        <div class="big" style="color:var(--accent)">填工具 → 发群附图 → 核实回「已核实」</div>
+        <div class="rs" style="margin-top:8px">算钱、优惠、记账、发群——系统全包，你只管录单和核实到账。</div>
+      </div>
+      <div class="url" style="margin-top:14px">doucang.github.io/onespa-flow/selfpay/</div>
+      <div class="note" style="text-align:center">工具网址 · 建议存书签 / 加主屏</div>
+      <div class="quote" style="margin-top:16px;text-align:center">有问题问组长或叶伟 · 别自己猜着发散客群</div>
+    </section>
+
+  </div>
+
+  <div>
+    <div class="nav">
+      <button class="btn ghost" id="prev">上一页</button>
+      <div class="dots" id="dots"></div>
+      <button class="btn" id="next">下一页</button>
+    </div>
+    <div class="cnt" id="cnt"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];
+  const dots=document.getElementById('dots');
+  let i=0;
+  slides.forEach((_,k)=>{const d=document.createElement('div');d.className='dot';d.onclick=()=>go(k);dots.appendChild(d);});
+  const dEls=[...dots.children];
+  function go(k){
+    i=Math.max(0,Math.min(slides.length-1,k));
+    slides.forEach((s,x)=>s.classList.toggle('on',x===i));
+    dEls.forEach((d,x)=>d.classList.toggle('on',x===i));
+    document.getElementById('prev').disabled=i===0;
+    document.getElementById('next').textContent=i===slides.length-1?'完成':'下一页';
+    document.getElementById('cnt').textContent=(i+1)+' / '+slides.length;
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('prev').onclick=()=>go(i-1);
+  document.getElementById('next').onclick=()=>go(i+1);
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(i+1);if(e.key==='ArrowLeft')go(i-1);});
+  let x0=null;
+  document.getElementById('stage').addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
+  document.getElementById('stage').addEventListener('touchend',e=>{
+    if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;
+    if(Math.abs(dx)>55){if(dx<0)go(i+1);else go(i-1);}x0=null;
+  },{passive:true});
+  go(0);
+})();
+</script>
+</body>
+</html>
