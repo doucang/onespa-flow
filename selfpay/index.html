@@ -66,6 +66,16 @@
     <div class="card">
       <h2>① 客户与到店</h2>
       <div class="row c2">
+        <div><label>订单类型</label>
+          <select id="otype">
+            <option value="instore">到店（默认）</option>
+            <option value="outcall">外派上门（免10%服务费）</option>
+          </select>
+        </div>
+        <div id="addrbox" style="display:none"><label>服务地址 *（技师上门）</label><input id="addr" placeholder="客人地址"></div>
+      </div>
+      <div id="outnote" class="notice"></div>
+      <div class="row c2">
         <div><label>客户姓名（选填）</label><input id="name" placeholder="陈美丽"></div>
         <div><label>手机号 *</label><input id="phone" placeholder="0123456789"></div>
       </div>
@@ -232,6 +242,12 @@ function applyAutoDiscount(){
     saveB = freeRow.priceCent;
   }
 
+  if(isOutcall()){
+    // 外派：无门票概念，任何优惠不适用
+    window._deal = {plan:null, save:0, alt:0};
+    rows.forEach(r=>{ if(r.kind==='massage'){ r.disc=false; r.autoDisc=false; r._userTouchedDisc=false; } });
+    return;
+  }
   if(saveB > 0 && saveB >= saveA){
     window._deal = {plan:'B', save:saveB, alt:saveA};
     rows.forEach(r=>{ if(r.kind==='massage'){ r.disc=false; r.autoDisc=false; r._userTouchedDisc=false; } });
@@ -295,9 +311,11 @@ function delRow(uid){
   applyAutoDiscount(); renderRows(); render();
 }
 
+function isOutcall(){ return el('otype') && el('otype').value==='outcall'; }
+
 function calc(){
   const sub = rows.reduce((a,r)=>a+rowAmount(r),0);
-  const sc = Math.round(sub*0.10);
+  const sc = isOutcall() ? 0 : Math.round(sub*0.10);
   const sst = Math.round(sub*0.08);
   return {sub, sc, sst, total: sub+sc+sst};
 }
@@ -339,7 +357,19 @@ function refHint(){
   if(!ok){ n.style.display='block'; n.textContent='⚠ 参考号格式可疑（应为8位以上字母数字、无空格）。请长按付款截图复制，不要手打。'; }
 }
 
+function outHint(){
+  el('addrbox').style.display = isOutcall() ? '' : 'none';
+  const n = el('outnote'); n.style.display='none';
+  if(!isOutcall()) return;
+  const bad = rows.filter(r=>['ticket','room','pkg'].includes(r.kind));
+  if(bad.length){
+    n.style.display='block';
+    n.textContent = '⚠ 外派单不含门票/套餐/包房（客人不进店），请移除：'+bad.map(r=>r.name).join('、');
+  }
+}
+
 function render(){
+  outHint();
   applyAutoDiscount();
   const {sub, sc, sst, total} = calc();
   let dealLine = '';
@@ -348,10 +378,14 @@ function render(){
     (D.alt>0?`<div class="tr" style="font-size:11.5px"><span>（另一方案 加购8折 仅省 ${money(D.alt)}，未采用）</span><span></span></div>`:'');
   if(D.plan==='A') dealLine = `<div class="tr" style="color:var(--accent);font-weight:600"><span>🏷️ 已自动取优：加购8折</span><span>−${money(D.save)}</span></div>`+
     (D.alt>0?`<div class="tr" style="font-size:11.5px"><span>（另一方案 满499免票 仅省 ${money(D.alt)}，未采用）</span><span></span></div>`:'');
+  const scRow = isOutcall()
+    ? `<div class="tr"><span>服务费 10%</span><span>—（外派免收）</span></div>`
+    : `<div class="tr"><span>服务费 10%</span><span>${money(sc)}</span></div>`;
   el('totals').innerHTML =
     dealLine+
+    (isOutcall()?`<div class="tr" style="color:var(--warn);font-weight:600"><span>🚗 外派上门单</span><span>免服务费·无门票优惠</span></div>`:'')+
     `<div class="tr"><span>小计（净价·已含优惠）</span><span>${money(sub)}</span></div>`+
-    `<div class="tr"><span>服务费 10%</span><span>${money(sc)}</span></div>`+
+    scRow+
     `<div class="tr"><span>SST 8%</span><span>${money(sst)}</span></div>`+
     `<div class="tr grand"><span>应付总额</span><span>${money(total)}</span></div>`;
 
@@ -385,8 +419,14 @@ function render(){
   }else{ L.push('商品：—'); }
   const px=paxStr(); L.push('人数：'+(px||'—'));
   L.push('');
-  L.push('预约入场：'+(fmtDate()||'—'));
-  L.push('到店状态：待到店');
+  if(isOutcall()){
+    L.push('服务方式：外派上门');
+    L.push('服务时间：'+(fmtDate()||'—'));
+    L.push('服务地址：'+(el('addr').value.trim()||'—'));
+  }else{
+    L.push('预约入场：'+(fmtDate()||'—'));
+    L.push('到店状态：待到店');
+  }
   L.push('');
   L.push('金额：'+money(paid||total)+'（商品 '+money(sub)+' + 税费 '+money(sc+sst)+'）');
   let payline='支付：'+el('method').value+'｜已付款·客服已核实';
@@ -394,8 +434,8 @@ function render(){
   L.push(payline);
   if(el('ref').value.trim()) L.push('参考号：'+el('ref').value.trim());
   L.push('');
-  L.push('来源：客服录单（官网外收款）');
-  L.push('前台请按预约时间安排到店，凭参考号核销。');
+  L.push('来源：客服录单（官网外收款）'+(isOutcall()?'｜外派':''));
+  L.push(isOutcall() ? '外派单：技师上门服务，凭参考号核销。' : '前台请按预约时间安排到店，凭参考号核销。');
   if(el('staff').value.trim()) L.push('（录单：'+el('staff').value.trim()+'）');
   el('preview').textContent = L.join('\n');
 }
@@ -417,6 +457,10 @@ function buildSubmit(){
   L.push('客户姓名：'+(el('name').value.trim()||'未提供'));
   L.push('手机号：'+el('phone').value.trim());
   L.push('预约时间：'+el('date').value+' '+el('time').value);
+  if(isOutcall()){
+    L.push('服务方式：外派上门');
+    L.push('服务地址：'+el('addr').value.trim());
+  }
   L.push('');
   L.push('付款金额：RM '+((paid||total)/100).toFixed(2));
   L.push('税费：RM '+((sc+sst)/100).toFixed(2));
@@ -450,6 +494,12 @@ function copySubmit(){
   const {total} = calc();
   if(!rows.length || !el('phone').value.trim() || !el('date').value){
     alert('请先填齐：手机号、到店日期时间、至少一个项目。'); return;
+  }
+  if(isOutcall() && !el('addr').value.trim()){
+    alert('外派单必须填写服务地址（技师要上门）。'); return;
+  }
+  if(isOutcall() && rows.some(r=>['ticket','room','pkg'].includes(r.kind))){
+    alert('外派单不能包含门票/套餐/包房项目，请先移除。'); return;
   }
   if(paid && Math.abs(paid-total)>1){
     if(!confirm('实付与应付不一致（见黄色提示）。特殊价请直接改单价让两者一致。仍要复制吗？')) return;
