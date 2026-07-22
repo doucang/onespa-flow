@@ -60,8 +60,8 @@
 </head>
 <body>
 <div class="wrap">
-  <h1><span class="dot"></span>壹号汤泉 · 客户自付款单生成器 <span style="font-size:12px;color:var(--muted);font-weight:400">v2 · 价目 2026-07-04</span></h1>
-  <p class="sub">选项目自动带价、自动算 10% 服务费 + 8% SST；含门票时官网按摩项自动 8 折。价格如与官网调整不符，以官网为准并通知更新工具。</p>
+  <h1><span class="dot"></span>壹号汤泉 · 客户自付款单生成器 <span style="font-size:12px;color:var(--muted);font-weight:400">v2 · 价目 2026-07-22</span></h1>
+  <p class="sub">选项目自动带价、按项目计税：店内 10% 服务费 + 8% SST，外派仅 8% SST；含门票时官网按摩项自动 8 折。价格如与官网调整不符，以官网为准并通知更新工具。</p>
   <div class="grid">
     <div class="card">
       <h2>① 客户与到店</h2>
@@ -132,7 +132,7 @@
 </div>
 
 <script>
-// 价格单位：分（cent）。净价，前台展示与计算自动 +10% SC +8% SST（各按净价，不复合）。
+// 价格单位：分（cent）。默认店内净价 +10% SC +8% SST；tax:108 的外派项仅 +8% SST（均按净价，不复合）。
 // 来源：官方价目表事实源 OneSpa官方价目表-权威事实-2026-07-05 + 事实库v2 §5（8折终局：门店经典参与，仅包房除外，✅板7/4晚+7/6确认）。
 // 包房实价：暴风雨499/1h·699/4h订3送1；高尔夫99/1h·139/2h·199/3h按房收费(respond.io 7/3铁证)。KTV不收录(待拍板)。
 const CATALOG = [
@@ -143,7 +143,6 @@ const CATALOG = [
   {id:"twin-we", n:"双人买一送一 Twin · 周五六/公假", p:19900, k:"ticket", we:1},
   {id:"kids-wd", n:"儿童票 Kids · 周日至周四", p:5800, k:"ticket", wd:1},
   {id:"kids-we", n:"儿童票 Kids · 周五六/公假", p:8800, k:"ticket", we:1},
-  {id:"worldcup", n:"世界杯观赛夜 12小时票", p:21800, k:"ticket"},
  ]},
  {group:"🧖 套餐 / 活动", items:[
   {id:"daytime", n:"日间按摩套餐 Daytime（9am-5pm）", p:19900, k:"pkg"},
@@ -151,6 +150,13 @@ const CATALOG = [
   {id:"scrub-we", n:"扬州搓澡套餐(含门票) · 周五六/公假", p:23900, k:"pkg", we:1},
   {id:"lunch1", n:"商务午餐 · 单次（工作日11am-2pm）", p:2990, k:"pkg"},
   {id:"lunch10", n:"商务午餐 · 十次卡", p:24900, k:"pkg"},
+  {id:"all-day-scrub", n:"沐净舒养套餐", p:37900, k:"pkg", tax:118},
+  {id:"daytime-duo", n:"日间双人套餐（两人）", p:37900, k:"pkg", tax:118},
+ ]},
+ {group:"🚗 外派上门（仅8% SST；车费现场现金付）", items:[
+  {id:"outcall-classic-2h", n:"上门按摩·经典 2 小时", p:69900, k:"outcall", tax:108},
+  {id:"outcall-anytime-2h", n:"上门按摩·随时约（2 小时）", p:79800, k:"outcall", tax:108},
+  {id:"outcall-four-hands-2h", n:"四手尊享·2 小时", p:169900, k:"outcall", tax:108},
  ]},
  {group:"💆 按摩理疗 · 15项（车含B1F1或单人票→自动8折）", items:[
   {id:"local", n:"局部理疗 30min", p:19900, k:"massage"},
@@ -187,8 +193,9 @@ const CATALOG = [
 const BYID = {};
 CATALOG.forEach(g=>g.items.forEach(i=>BYID[i.id]=i));
 
-let rows = [];   // {uid, id|null, name, kind, qty, priceCent, disc(bool), autoDisc(bool)}
+let rows = [];   // {uid, id|null, name, kind, qty, priceCent, tax(108|118|undefined), disc(bool), autoDisc(bool)}
 let uidSeq = 1;
+const OUTCALL_TRAVEL_NOTE = '车费 RM100（30 公里内）到府现场现金付，不含在本单';
 
 function el(id){return document.getElementById(id)}
 function money(c){return 'RM'+(c/100).toFixed(2)}
@@ -211,16 +218,17 @@ function addPicked(){
     rows.push({uid:uidSeq++, id:null, name:'', kind:'custom', qty:1, priceCent:0, disc:false, autoDisc:false});
   }else{
     const it = BYID[v];
-    rows.push({uid:uidSeq++, id:it.id, name:it.n, kind:it.k, qty:1, priceCent:it.p, disc:false, autoDisc:false});
+    if(it.tax===108) el('otype').value='outcall';
+    rows.push({uid:uidSeq++, id:it.id, name:it.n, kind:it.k, qty:1, priceCent:it.p, tax:it.tax, disc:false, autoDisc:false});
   }
   applyAutoDiscount();
   renderRows(); render();
 }
 
-function hasTicket(){ return rows.some(r=>r.kind==='ticket' && r.id!=='kids-wd' && r.id!=='kids-we' && r.id!=='worldcup'); }
+function hasTicket(){ return rows.some(r=>r.kind==='ticket' && r.id!=='kids-wd' && r.id!=='kids-we'); }
 
 // ===== 1b 口径（✅板 7/6）：免票与8折互斥，工具自动比价取优 =====
-// Plan A 加购8折：车含 B1F1/Solo（儿童/世界杯除外）→ 单项净价<499 的按摩/理疗 8 折；≥499 单项永不打折。
+// Plan A 加购8折：车含 B1F1/Solo（儿童除外）→ 单项净价<499 的按摩/理疗 8 折；≥499 单项永不打折。
 // Plan B 满499免票：按摩合计（原价）≥499 且车内有 Solo 票 → 免 1 张 Solo（最贵那张），全单按摩原价。
 // 两案自动取省得多的；Twin 票不可拆免（买一送一无"1位"可免），无 Solo 时 Plan B 不可用。
 const DISC_CAP = 49900; // 单项≥499 不参与8折
@@ -312,10 +320,14 @@ function delRow(uid){
 }
 
 function isOutcall(){ return el('otype') && el('otype').value==='outcall'; }
+function hasOutcallItem(){ return rows.some(r=>r.tax===108); }
+function isOutcallOrder(){ return isOutcall() || hasOutcallItem(); }
+function rowTax(r){ return r.tax || (isOutcall() ? 108 : 118); }
 
 function calc(){
   const sub = rows.reduce((a,r)=>a+rowAmount(r),0);
-  const sc = isOutcall() ? 0 : Math.round(sub*0.10);
+  const storeSub = rows.reduce((a,r)=>a+(rowTax(r)===118 ? rowAmount(r) : 0),0);
+  const sc = Math.round(storeSub*0.10);
   const sst = Math.round(sub*0.08);
   return {sub, sc, sst, total: sub+sc+sst};
 }
@@ -358,14 +370,15 @@ function refHint(){
 }
 
 function outHint(){
-  el('addrbox').style.display = isOutcall() ? '' : 'none';
+  el('addrbox').style.display = isOutcallOrder() ? '' : 'none';
   const n = el('outnote'); n.style.display='none';
-  if(!isOutcall()) return;
+  if(!isOutcallOrder()) return;
+  const messages = hasOutcallItem() ? ['🚗 '+OUTCALL_TRAVEL_NOTE] : [];
   const bad = rows.filter(r=>['ticket','room','pkg'].includes(r.kind));
   if(bad.length){
-    n.style.display='block';
-    n.textContent = '⚠ 外派单不含门票/套餐/包房（客人不进店），请移除：'+bad.map(r=>r.name).join('、');
+    messages.push('⚠ 外派单不含门票/套餐/包房（客人不进店），请移除：'+bad.map(r=>r.name).join('、'));
   }
+  if(messages.length){ n.style.display='block'; n.textContent=messages.join('｜'); }
 }
 
 function render(){
@@ -378,12 +391,12 @@ function render(){
     (D.alt>0?`<div class="tr" style="font-size:11.5px"><span>（另一方案 加购8折 仅省 ${money(D.alt)}，未采用）</span><span></span></div>`:'');
   if(D.plan==='A') dealLine = `<div class="tr" style="color:var(--accent);font-weight:600"><span>🏷️ 已自动取优：加购8折</span><span>−${money(D.save)}</span></div>`+
     (D.alt>0?`<div class="tr" style="font-size:11.5px"><span>（另一方案 满499免票 仅省 ${money(D.alt)}，未采用）</span><span></span></div>`:'');
-  const scRow = isOutcall()
+  const scRow = isOutcallOrder() && sc===0
     ? `<div class="tr"><span>服务费 10%</span><span>—（外派免收）</span></div>`
     : `<div class="tr"><span>服务费 10%</span><span>${money(sc)}</span></div>`;
   el('totals').innerHTML =
     dealLine+
-    (isOutcall()?`<div class="tr" style="color:var(--warn);font-weight:600"><span>🚗 外派上门单</span><span>免服务费·无门票优惠</span></div>`:'')+
+    (isOutcallOrder()?`<div class="tr" style="color:var(--warn);font-weight:600"><span>🚗 外派上门单</span><span>免服务费·无门票优惠</span></div>`:'')+
     `<div class="tr"><span>小计（净价·已含优惠）</span><span>${money(sub)}</span></div>`+
     scRow+
     `<div class="tr"><span>SST 8%</span><span>${money(sst)}</span></div>`+
@@ -419,7 +432,7 @@ function render(){
   }else{ L.push('商品：—'); }
   const px=paxStr(); L.push('人数：'+(px||'—'));
   L.push('');
-  if(isOutcall()){
+  if(isOutcallOrder()){
     L.push('服务方式：外派上门');
     L.push('服务时间：'+(fmtDate()||'—'));
     L.push('服务地址：'+(el('addr').value.trim()||'—'));
@@ -429,13 +442,14 @@ function render(){
   }
   L.push('');
   L.push('金额：'+money(paid||total)+'（商品 '+money(sub)+' + 税费 '+money(sc+sst)+'）');
+  if(hasOutcallItem()) L.push(OUTCALL_TRAVEL_NOTE);
   let payline='支付：'+el('method').value+'｜已付款·客服已核实';
   if(el('ptime').value.trim()) payline+='｜'+el('ptime').value.trim();
   L.push(payline);
   if(el('ref').value.trim()) L.push('参考号：'+el('ref').value.trim());
   L.push('');
-  L.push('来源：客服录单（官网外收款）'+(isOutcall()?'｜外派':''));
-  L.push(isOutcall() ? '外派单：技师上门服务，凭参考号核销。' : '前台请按预约时间安排到店，凭参考号核销。');
+  L.push('来源：客服录单（官网外收款）'+(isOutcallOrder()?'｜外派':''));
+  L.push(isOutcallOrder() ? '外派单：技师上门服务，凭参考号核销。' : '前台请按预约时间安排到店，凭参考号核销。');
   if(el('staff').value.trim()) L.push('（录单：'+el('staff').value.trim()+'）');
   el('preview').textContent = L.join('\n');
 }
@@ -457,13 +471,14 @@ function buildSubmit(){
   L.push('客户姓名：'+(el('name').value.trim()||'未提供'));
   L.push('手机号：'+el('phone').value.trim());
   L.push('预约时间：'+el('date').value+' '+el('time').value);
-  if(isOutcall()){
+  if(isOutcallOrder()){
     L.push('服务方式：外派上门');
     L.push('服务地址：'+el('addr').value.trim());
   }
   L.push('');
   L.push('付款金额：RM '+((paid||total)/100).toFixed(2));
   L.push('税费：RM '+((sc+sst)/100).toFixed(2));
+  if(hasOutcallItem()) L.push(OUTCALL_TRAVEL_NOTE);
   L.push('');
   let i=1;
   rows.forEach(r=>{
@@ -495,10 +510,10 @@ function copySubmit(){
   if(!rows.length || !el('phone').value.trim() || !el('date').value){
     alert('请先填齐：手机号、到店日期时间、至少一个项目。'); return;
   }
-  if(isOutcall() && !el('addr').value.trim()){
+  if(isOutcallOrder() && !el('addr').value.trim()){
     alert('外派单必须填写服务地址（技师要上门）。'); return;
   }
-  if(isOutcall() && rows.some(r=>['ticket','room','pkg'].includes(r.kind))){
+  if(isOutcallOrder() && rows.some(r=>['ticket','room','pkg'].includes(r.kind))){
     alert('外派单不能包含门票/套餐/包房项目，请先移除。'); return;
   }
   if(paid && Math.abs(paid-total)>1){
@@ -511,7 +526,7 @@ function copySubmit(){
 }
 
 initPick();
-['name','phone','date','time','male','female','child','paid','method','ref','ptime','staff']
+['otype','addr','name','phone','date','time','male','female','child','paid','method','ref','ptime','staff']
   .forEach(id=>el(id).addEventListener('input',render));
 render();
 </script>
