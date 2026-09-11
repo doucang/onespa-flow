@@ -60,8 +60,8 @@
 </head>
 <body>
 <div class="wrap">
-  <h1><span class="dot"></span>壹号汤泉 · 客户自付款单生成器 <span style="font-size:12px;color:var(--muted);font-weight:400">v2 · 价目 2026-07-22</span></h1>
-  <p class="sub">选项目自动带价、按项目计税：店内 10% 服务费 + 8% SST，外派仅 8% SST；含门票时官网按摩项自动 8 折。价格如与官网调整不符，以官网为准并通知更新工具。</p>
+  <h1><span class="dot"></span>壹号汤泉 · 客户自付款单生成器 <span style="font-size:12px;color:var(--muted);font-weight:400">v2 · 买一送一按摩加购候选 2026-09-11</span></h1>
+  <p class="sub">选项目自动带价、按项目计税：店内 10% 服务费 + 8% SST，外派仅 8% SST；含门票时官网按摩项自动 8 折。买一送一 60 分钟成人加购为独立固定价，不再打折；仅在该项目开放时录单。其他价格如调整，请核实后更新工具。</p>
   <div class="grid">
     <div class="card">
       <h2>① 客户与到店</h2>
@@ -86,9 +86,11 @@
       <div class="row c3">
         <div><label>男</label><input id="male" type="number" min="0" value="0"></div>
         <div><label>女</label><input id="female" type="number" min="0" value="0"></div>
-        <div><label>小孩</label><input id="child" type="number" min="0" value="0"></div>
+        <div><label>儿童 3–12 岁</label><input id="child" type="number" min="0" value="0"></div>
+        <div><label>幼儿 0–2 岁（免费登记）</label><input id="infant" type="number" min="0" value="0"></div>
       </div>
       <div id="daynote" class="notice"></div>
+      <div id="retailnote" class="notice"></div>
 
       <h2 style="margin-top:18px">② 项目（选了自动带价）</h2>
       <div class="addbar">
@@ -96,7 +98,7 @@
         <button onclick="addPicked()">＋ 添加</button>
       </div>
       <div id="items"></div>
-      <div class="hintline">💡 单价可手改（特殊价直接改数字）；「8折」勾选框只出现在官网按摩项上，含门票时自动勾上。</div>
+      <div class="hintline">💡 普通项目单价可手改；买一送一按摩加购固定价不可改；「8折」勾选框只出现在官网按摩项上，含门票时自动勾上。</div>
 
       <div class="totals" id="totals"></div>
 
@@ -131,6 +133,8 @@
   </div>
 </div>
 
+<script src="retail-config.js"></script>
+<script src="retail-rules.js"></script>
 <script>
 // 价格单位：分（cent）。默认店内净价 +10% SC +8% SST；tax:108 的外派项仅 +8% SST（均按净价，不复合）。
 // 来源：官方价目表事实源 OneSpa官方价目表-权威事实-2026-07-05 + 事实库v2 §5（8折终局：门店经典参与，仅包房除外，✅板7/4晚+7/6确认）。
@@ -143,6 +147,9 @@ const CATALOG = [
   {id:"twin-we", n:"双人买一送一 Twin · 周五六/公假", p:19900, k:"ticket", we:1},
   {id:"kids-wd", n:"儿童票 Kids · 周日至周四", p:5800, k:"ticket", wd:1},
   {id:"kids-we", n:"儿童票 Kids · 周五六/公假", p:8800, k:"ticket", we:1},
+ ]},
+ {group:"💆 买一送一专属加购 · 固定价（须已开放）", items:[
+  {id:"b1f1-massage60", n:"买一送一加购 60 分钟按摩", p:12000, k:"b1f1_addon", tax:118},
  ]},
  {group:"🧖 套餐 / 活动", items:[
   {id:"daytime", n:"日间按摩套餐 Daytime（9am-5pm）", p:19900, k:"pkg"},
@@ -204,6 +211,7 @@ function initPick(){
   const s = el('pick');
   let html = '';
   CATALOG.forEach(g=>{
+    if(g.items[0]?.k==='b1f1_addon' && window.ONE_SPA_RETAIL_CONFIG?.new_sales_enabled!==true) return;
     html += `<optgroup label="${g.group}">`;
     g.items.forEach(i=>{ html += `<option value="${i.id}">${i.n} — ${money(i.p)}</option>`; });
     html += '</optgroup>';
@@ -218,8 +226,9 @@ function addPicked(){
     rows.push({uid:uidSeq++, id:null, name:'', kind:'custom', qty:1, priceCent:0, disc:false, autoDisc:false});
   }else{
     const it = BYID[v];
+    if(it.k==='b1f1_addon' && window.ONE_SPA_RETAIL_CONFIG?.new_sales_enabled!==true){alert('该加购暂未开放录单。');return;}
     if(it.tax===108) el('otype').value='outcall';
-    rows.push({uid:uidSeq++, id:it.id, name:it.n, kind:it.k, qty:1, priceCent:it.p, tax:it.tax, disc:false, autoDisc:false});
+    rows.push({uid:uidSeq++, id:it.id, name:it.n, kind:it.k, qty:1, priceCent:it.p, tax:it.tax, disc:false, autoDisc:false, treatment:it.k==='b1f1_addon'?'undecided':undefined});
   }
   applyAutoDiscount();
   renderRows(); render();
@@ -235,7 +244,7 @@ const DISC_CAP = 49900; // 单项≥499 不参与8折
 
 function applyAutoDiscount(){
   const t = hasTicket();
-  rows.forEach(r=>{ r._freeTicket = false; });
+  rows.forEach(r=>{ r._freeTicket = false; if(r.kind==='b1f1_addon'){r.disc=false;r.autoDisc=false;} });
   const mass = rows.filter(r=>r.kind==='massage');
   const sumOrig = mass.reduce((a,r)=>a+r.priceCent*(r.qty||1),0);
 
@@ -274,7 +283,7 @@ function applyAutoDiscount(){
 
 function rowAmount(r){
   if(r._freeTicket) return 0;
-  const unit = r.disc ? Math.round(r.priceCent*0.8) : r.priceCent;
+  const unit = r.kind==='b1f1_addon' ? 12000 : (r.disc ? Math.round(r.priceCent*0.8) : r.priceCent);
   return unit * (r.qty||0);
 }
 
@@ -298,12 +307,13 @@ function renderRows(){
           if(r.disc) discCtl += `<span>折后 ${money(Math.round(r.priceCent*0.8))}</span>`;
         }
       }
+      if(r.kind==='b1f1_addon') discCtl += '<span>固定 RM120++ / RM141.60 含税，不参与折扣</span><select aria-label="按摩项目" onchange="rows.find(x=>x.uid==='+r.uid+').treatment=this.value;render()">'+[['undecided','到店二选一'],['tuina','全身中式推拿'],['footclassic','经典足疗']].map(([v,n])=>'<option value="'+v+'" '+(r.treatment===v?'selected':'')+'>'+n+'</option>').join('')+'</select>';
       if(r._freeTicket) discCtl += `<span style="color:var(--accent);font-weight:600">🎁 满499免票 −${money(r.priceCent)}</span>`;
       inner = `<div class="nm"><span class="t">${r.name}</span><div class="d"><span>${money(r.priceCent)}</span>${discCtl}</div></div>`;
     }
     d.innerHTML = inner +
-      `<input class="qty" type="number" min="1" value="${r.qty}" title="数量" oninput="rows.find(x=>x.uid===${r.uid}).qty=parseInt(this.value)||1;render()">` +
-      `<input class="prc" type="number" min="0" step="0.01" value="${(r.priceCent/100).toFixed(2)}" title="单价RM(可改)" oninput="rows.find(x=>x.uid===${r.uid}).priceCent=Math.round((parseFloat(this.value)||0)*100);render()">` +
+      `<input class="qty" type="number" min="1" value="${r.qty}" title="数量" oninput="rows.find(x=>x.uid===${r.uid}).qty=Number(this.value);render()">` +
+      `<input class="prc" type="number" min="0" step="0.01" value="${(r.priceCent/100).toFixed(2)}" title="单价RM(加购固定)" ${r.kind==='b1f1_addon'?'readonly':''} oninput="rows.find(x=>x.uid===${r.uid}).priceCent=Math.round((parseFloat(this.value)||0)*100);render()">` +
       `<button class="del" onclick="delRow(${r.uid})">×</button>`;
     box.appendChild(d);
   });
@@ -311,6 +321,7 @@ function renderRows(){
 
 function toggleDisc(uid, on){
   const r = rows.find(x=>x.uid===uid);
+  if(r.kind==='b1f1_addon') return;
   r.disc = on; r._userTouchedDisc = true; r.autoDisc = false;
   render();
 }
@@ -339,7 +350,7 @@ function fmtDate(){
   let s=y+'年'+m+'月'+day+'日'; if(t) s+=' '+t; return s;
 }
 function paxStr(){
-  const m=+el('male').value||0,f=+el('female').value||0,c=+el('child').value||0,tot=m+f+c;
+  const m=+el('male').value||0,f=+el('female').value||0,c=(+el('child').value||0)+(+el('infant').value||0),tot=m+f+c;
   if(!tot) return '';
   let a=[]; if(m)a.push('男'+m); if(f)a.push('女'+f); if(c)a.push('小孩'+c);
   return tot+'人（'+a.join(' ')+'）';
@@ -381,6 +392,27 @@ function outHint(){
   if(messages.length){ n.style.display='block'; n.textContent=messages.join('｜'); }
 }
 
+function retailValidation(){
+  if(typeof OneSpaRetailRules==='undefined')return rows.some(r=>r.kind==='b1f1_addon')?{ok:false,message:'加购校验暂不可用，请人工核对。'}:{ok:true,active:false};
+  return OneSpaRetailRules.validate({rows,party:{adults:Number(el('male').value)+Number(el('female').value),children_3_12:Number(el('child').value),children_0_2:Number(el('infant').value)},date:el('date').value,orderType:el('otype').value,config:window.ONE_SPA_RETAIL_CONFIG});
+}
+function retailSubmissionError(){
+  const v=retailValidation();if(!v.ok)return v.message;
+  if(v.active){
+    if(!el('time').value)return '请补齐到店时间。';
+    const paid=Math.round(Number(el('paid').value)*100);
+    if(!paid || Math.abs(paid-v.total)>1)return '加购单实付金额必须与整单含税金额一致；差额请人工核对。';
+    if(!el('ref').value.trim())return '请填写原始付款凭证参考号，并随单附上凭证。';
+  }
+  return '';
+}
+function treatmentLabel(r){return r.kind==='b1f1_addon' ? '（每份 60 分钟，'+({tuina:'全身中式推拿',footclassic:'经典足疗',undecided:'全身或足部到店二选一'}[r.treatment]||'项目待核')+'）' : '';}
+function retailHint(){
+  const v=retailValidation(), n=el('retailnote');
+  n.style.display=v.active || !v.ok?'block':'none';
+  n.textContent=v.ok?`本组合可加 ${v.eligible} 份成人按摩，已选 ${v.massageQty} 份。购买权益不锁定按摩时间或技师。`:v.message;
+  el('copy').disabled=!v.ok;el('copysub').disabled=!v.ok;
+}
 function render(){
   outHint();
   applyAutoDiscount();
@@ -409,7 +441,7 @@ function render(){
   else if(Math.abs(paid-total)<=1){ chk.className='checkbar ok'; chk.textContent='✓ 实付 '+money(paid)+' = 应付 '+money(total); }
   else{ chk.className='checkbar warn'; chk.textContent='⚠ 实付 '+money(paid)+' 与应付 '+money(total)+' 不一致，请核对（改价/折扣请直接改单价）'; }
 
-  dayHint(); refHint();
+  dayHint(); refHint(); retailHint();
 
   const L=[];
   L.push('🧾 *小ONE：客服自付款单*');
@@ -424,13 +456,14 @@ function render(){
   }else if(its.length){
     L.push('商品：');
     its.forEach(r=>{
-      let line='- '+(r.name||'—')+' ×'+(r.qty||1)+' — '+money(rowAmount(r));
+      let line='- '+(r.name||'—')+treatmentLabel(r)+' ×'+(r.qty||1)+' — '+money(rowAmount(r));
       if(r.disc) line+='（原'+money(r.priceCent*(r.qty||1))+' 8折）';
       if(r._freeTicket) line+='（满499免门票）';
       L.push(line);
     });
   }else{ L.push('商品：—'); }
   const px=paxStr(); L.push('人数：'+(px||'—'));
+  if(rows.some(r=>r.kind==='b1f1_addon')) L.push('儿童年龄档：3–12 岁 '+el('child').value+' 人，0–2 岁 '+el('infant').value+' 人（免费登记）');
   L.push('');
   if(isOutcallOrder()){
     L.push('服务方式：外派上门');
@@ -443,7 +476,7 @@ function render(){
   L.push('');
   L.push('金额：'+money(paid||total)+'（商品 '+money(sub)+' + 税费 '+money(sc+sst)+'）');
   if(hasOutcallItem()) L.push(OUTCALL_TRAVEL_NOTE);
-  let payline='支付：'+el('method').value+'｜已付款·客服已核实';
+  let payline='支付：'+el('method').value+(rows.some(r=>r.kind==='b1f1_addon')?'｜付款凭证待核对':'｜已付款·客服已核实');
   if(el('ptime').value.trim()) payline+='｜'+el('ptime').value.trim();
   L.push(payline);
   if(el('ref').value.trim()) L.push('参考号：'+el('ref').value.trim());
@@ -455,6 +488,7 @@ function render(){
 }
 
 function copyText(){
+  const error=retailSubmissionError();if(error){alert(error);return;}
   navigator.clipboard.writeText(el('preview').textContent).then(()=>{
     const b=el('copy'); b.textContent='✓ 已复制'; b.classList.add('done');
     setTimeout(()=>{b.textContent='复制散客群通知（备用·人工发群）'; b.classList.remove('done')},1600);
@@ -463,6 +497,7 @@ function copyText(){
 
 // 提交块：intake 兼容模板（机器确定性解析入库用）
 function buildSubmit(){
+  const error=retailSubmissionError();if(error)throw new Error(error);
   const {sub, sc, sst, total} = calc();
   const paid = Math.round((parseFloat(el('paid').value)||0)*100);
   const L=[];
@@ -484,7 +519,7 @@ function buildSubmit(){
   rows.forEach(r=>{
     const nm=(r.name||'').trim(); if(!nm && r.kind!=='custom') return;
     L.push('套餐'+i);
-    L.push('套餐名：'+nm+(r.disc?'（8折）':'')+(r._freeTicket?'（满499免门票）':''));
+    L.push('套餐名：'+nm+treatmentLabel(r)+(r.disc?'（8折）':'')+(r._freeTicket?'（满499免门票）':''));
     L.push('数量：'+(r.qty||1));
     L.push('金额：RM'+(rowAmount(r)/100).toFixed(2));
     L.push('');
@@ -493,7 +528,8 @@ function buildSubmit(){
   L.push('人数');
   L.push('男：'+(+el('male').value||0));
   L.push('女：'+(+el('female').value||0));
-  L.push('小孩：'+(+el('child').value||0));
+  L.push('小孩：'+((+el('child').value||0)+(+el('infant').value||0)));
+  if(rows.some(r=>r.kind==='b1f1_addon')) L.push('儿童年龄档：3–12 岁 '+el('child').value+' 人；0–2 岁 '+el('infant').value+' 人（免费登记）');
   L.push('');
   L.push('付款方式：'+el('method').value);
   if(el('ptime').value.trim()) L.push('付款时间：'+el('ptime').value.trim());
@@ -505,6 +541,7 @@ function buildSubmit(){
 }
 
 function copySubmit(){
+  const error=retailSubmissionError();if(error){alert(error);return;}
   const paid = Math.round((parseFloat(el('paid').value)||0)*100);
   const {total} = calc();
   if(!rows.length || !el('phone').value.trim() || !el('date').value){
@@ -526,7 +563,7 @@ function copySubmit(){
 }
 
 initPick();
-['otype','addr','name','phone','date','time','male','female','child','paid','method','ref','ptime','staff']
+['otype','addr','name','phone','date','time','male','female','child','infant','paid','method','ref','ptime','staff']
   .forEach(id=>el(id).addEventListener('input',render));
 render();
 </script>
