@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>壹号汤泉 · 客户自付款单生成器 v2</title>
+<title>【已停用】壹号汤泉 · 客户自付款单生成器 v2</title>
 <style>
   :root{
     --bg:#eef2f0; --card:#ffffff; --ink:#1f2d2a; --muted:#6b7d78;
@@ -61,6 +61,9 @@
 <body>
 <div class="wrap">
   <h1><span class="dot"></span>壹号汤泉 · 客户自付款单生成器 <span style="font-size:12px;color:var(--muted);font-weight:400">v2 · 价目 2026-07-22</span></h1>
+  <div role="alert" style="margin:0 0 16px;padding:12px 14px;border-radius:10px;background:#fdecea;border:1.5px solid #c0392b;color:#7b1f16;font-size:13.5px;line-height:1.6">
+    <b>⛔ 本工具已停用，请勿用来开单。</b><br>页面里的价格和折扣是 2026 年 7 月的旧口径，与现行价目不符，复制按钮已关闭。自付款单请走小ONE 现行流程；有疑问找组长或叶伟。
+  </div>
   <p class="sub">选项目自动带价、按项目计税：店内 10% 服务费 + 8% SST，外派仅 8% SST；含门票时官网按摩项自动 8 折。买一送一 60 分钟成人加购为独立固定价，不再打折；仅在该项目开放时录单。其他价格如调整，请核实后更新工具。</p>
   <div class="grid">
     <div class="card">
@@ -125,9 +128,9 @@
     <div class="card">
       <h2>散客群通知预览</h2>
       <div class="preview"><div class="bubble" id="preview">左边选好项目，这里自动生成…</div></div>
-      <button class="copybtn" id="copysub" onclick="copySubmit()">复制提交给小ONE（自动入库+发群）</button>
+      <button class="copybtn" id="copysub" onclick="copySubmit()">已停用 · 不可复制</button>
       <p class="tip">粘贴到<b>客服群</b>发送，<b>同一条消息附上付款截图</b>。系统核对通过出卡后，回复「@小ONE 已核实」即完成发群。</p>
-      <button class="copybtn" id="copy" onclick="copyText()" style="background:#fff;color:var(--accent);border:1.5px solid var(--accent);margin-top:8px">复制散客群通知（备用·人工发群）</button>
+      <button class="copybtn" id="copy" onclick="copyText()" style="background:#fff;color:var(--accent);border:1.5px solid var(--accent);margin-top:8px">已停用 · 不可复制</button>
       <p class="tip">仅在系统不可用时人工发散客群用。*…* 在 WhatsApp 里显示为粗体。</p>
     </div>
   </div>
@@ -411,7 +414,7 @@ function retailHint(){
   const v=retailValidation(), n=el('retailnote');
   n.style.display=v.active || !v.ok?'block':'none';
   n.textContent=v.ok?`本组合可加 ${v.eligible} 份成人按摩，已选 ${v.massageQty} 份。购买权益不锁定按摩时间或技师。`:v.message;
-  el('copy').disabled=!v.ok;el('copysub').disabled=!v.ok;
+  el('copy').disabled=true;el('copysub').disabled=true; // 已停用（2026-09-26）：旧价目，禁止复制
 }
 function render(){
   outHint();
@@ -488,6 +491,7 @@ function render(){
 }
 
 function copyText(){
+  return; // 已停用（2026-09-26）
   const error=retailSubmissionError();if(error){alert(error);return;}
   navigator.clipboard.writeText(el('preview').textContent).then(()=>{
     const b=el('copy'); b.textContent='✓ 已复制'; b.classList.add('done');
@@ -541,6 +545,7 @@ function buildSubmit(){
 }
 
 function copySubmit(){
+  return; // 已停用（2026-09-26）
   const error=retailSubmissionError();if(error){alert(error);return;}
   const paid = Math.round((parseFloat(el('paid').value)||0)*100);
   const {total} = calc();
